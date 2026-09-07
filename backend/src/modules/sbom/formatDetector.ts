@@ -1,21 +1,23 @@
-export type SbomFormat = "SPDX" | "CycloneDX" | "Unknown";
+export type SBOMFormat = "SPDX" | "CycloneDX" | "UNKNOWN";
 
-export function detectSbomFormat(sbom: unknown): SbomFormat {
-  if (!sbom || typeof sbom !== "object") {
-    return "Unknown";
-  }
-
-  const data = sbom as Record<string, unknown>;
-
-  // CycloneDX
-  if ("bomFormat" in data && data.bomFormat === "CycloneDX") {
-    return "CycloneDX";
-  }
-
-  // SPDX
-  if ("spdxVersion" in data) {
+export function detectSBOMFormat(data: any): SBOMFormat {
+  // SPDX detection
+  if (
+    data.spdxVersion ||
+    data.SPDXID ||
+    data.creationInfo
+  ) {
     return "SPDX";
   }
 
-  return "Unknown";
+  // CycloneDX detection
+  if (
+    data.bomFormat === "CycloneDX" ||
+    data.specVersion ||
+    data.components
+  ) {
+    return "CycloneDX";
+  }
+
+  return "UNKNOWN";
 }
