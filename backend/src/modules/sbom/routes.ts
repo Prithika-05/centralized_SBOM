@@ -6,6 +6,8 @@ import { detectSBOMFormat } from "./formatDetector.js";
 import { validateSBOM } from "./validator.js";
 import { parseSBOM } from "./parser.js";
 import { normalizeSBOM } from "./normalizer.js";
+import { storeSBOM } from "../../services/sbomGraphService.js";
+
 
 const router = Router();
 
@@ -13,7 +15,7 @@ const upload = multer({
   dest: "src/modules/sbom/uploads/",
 });
 
-router.post("/upload", upload.single("sbom"), (req, res) => {
+router.post("/upload", upload.single("sbom"), async (req, res, next) => {
   if (!req.file) {
     return res.status(400).json({
       error: "No SBOM file uploaded",
@@ -46,6 +48,8 @@ router.post("/upload", upload.single("sbom"), (req, res) => {
 
     // 6. Normalize parsed SBOM
     const normalizedSBOM = normalizeSBOM(parsedSBOM);
+
+    await storeSBOM(normalizedSBOM);
 
     // 7. Return result
     res.json({

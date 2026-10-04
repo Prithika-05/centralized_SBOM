@@ -53,7 +53,11 @@ export function parseCycloneDX(data: any): ParsedSBOM {
       version: component.version || "Unknown",
       supplier: component.supplier?.name,
       packageId: component.purl,
-      dependencies: [],
+      dependencies: Array.isArray(component.dependencies)
+      ? component.dependencies
+          .map((dependency: any) => dependency.ref)
+          .filter((ref: any): ref is string => typeof ref === "string")
+      : [],
       licenses,
       hashes,
     });
@@ -75,6 +79,16 @@ export function parseSPDX(data: any): ParsedSBOM {
     };
   }
 
+  // Build a map of SPDX package IDs to component indexes
+  const packageMap = new Map<string, number>();
+
+  data.packages.forEach((pkg: any, index: number) => {
+    if (pkg.SPDXID) {
+      packageMap.set(pkg.SPDXID, index);
+    }
+  });
+
+  // First parse the packages
   for (const pkg of data.packages) {
     const licenses: string[] = [];
 
@@ -108,6 +122,39 @@ export function parseSPDX(data: any): ParsedSBOM {
       licenses,
       hashes,
     });
+  }
+
+  // Process SPDX document-level relationships
+  if (Array.isArray(data.relationships)) {
+    for (const relationship of data.relationships) {
+      if (relationship.relationshipType !== "DEPENDS_ON") {
+        continue;
+      }
+
+      const sourceIndex = packageMap.get(
+        relationship.spdxElement
+      );
+
+      const targetIndex = packageMap.get(
+        relationship.relatedSpdxElement
+      );
+
+      if (
+        sourceIndex !== undefined &&
+        targetIndex !== undefined
+      ) {
+        const targetPackage = data.packages[targetIndex];
+
+        const dependencyId =
+          targetPackage.externalRefs?.[0]?.referenceLocator ||
+          targetPackage.SPDXID ||
+          targetPackage.name;
+
+        components[sourceIndex].dependencies.push(
+          dependencyId
+        );
+      }
+    }
   }
 
   return {
