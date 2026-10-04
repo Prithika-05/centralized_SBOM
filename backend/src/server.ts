@@ -6,6 +6,8 @@ import {
   testNeo4jConnection,
   createTestNode,
 } from "./services/neo4jService.js";
+import { getDirectDependencies } from "./services/dependencyService.js";
+
 
 dotenv.config();
 
@@ -16,7 +18,6 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use("/api/sboms", sbomRoutes);
 
 // Root endpoint
 app.get("/", (_req, res) => {
@@ -67,6 +68,33 @@ app.post("/api/health/neo4j/test-node", async (_req, res) => {
     });
   }
 });
+
+app.get(
+  "/api/components/:componentId/dependencies",
+  async (req, res) => {
+    try {
+      const componentId = req.params.componentId;
+
+      const result = await getDirectDependencies(componentId);
+
+      res.json(result);
+    } catch (error) {
+      console.error(
+        "Failed to retrieve dependencies:",
+        error
+      );
+
+      res.status(500).json({
+        status: "ERROR",
+        message: "Failed to retrieve dependencies",
+      });
+    }
+  }
+);
+
+
+app.use("/api/sboms", sbomRoutes);
+
 
 // Start server
 app.listen(PORT, () => {

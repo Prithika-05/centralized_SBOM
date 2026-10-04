@@ -22,6 +22,7 @@ export async function storeSBOM(
 
       const sbomId = result.records[0].get("sbomId");
 
+      // Create component nodes
       for (const component of sbom.components) {
         await tx.run(
           `
@@ -53,6 +54,24 @@ export async function storeSBOM(
             hashes: component.hashes,
           }
         );
+      }
+
+      // Create dependency relationships
+      for (const component of sbom.components) {
+        for (const dependency of component.dependencies) {
+          await tx.run(
+            `
+            MATCH (source:Component {id: $sourceId})
+            MATCH (target:Component {id: $targetId})
+
+            CREATE (source)-[:DEPENDS_ON]->(target)
+            `,
+            {
+              sourceId: component.id,
+              targetId: dependency,
+            }
+          );
+        }
       }
     });
   } finally {
