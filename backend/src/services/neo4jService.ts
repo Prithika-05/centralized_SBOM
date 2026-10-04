@@ -13,3 +13,17 @@ export async function testNeo4jConnection(): Promise<boolean> {
     await session.close();
   }
 }
+
+export async function createTestNode(): Promise<void> {
+  const session = neo4jDriver.session();
+
+  try {
+    await session.run(`
+      CREATE (n:TestNode {
+        name: "SBOM Demo"
+      })
+    `);
+  } finally {
+    await session.close();
+  }
+}

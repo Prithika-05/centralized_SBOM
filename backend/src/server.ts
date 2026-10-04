@@ -2,7 +2,10 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import sbomRoutes from "./modules/sbom/routes.js";
-import { testNeo4jConnection } from "./services/neo4jService.js";
+import {
+  testNeo4jConnection,
+  createTestNode,
+} from "./services/neo4jService.js";
 
 dotenv.config();
 
@@ -45,6 +48,24 @@ app.get("/api/health/neo4j", async (_req, res) => {
     status: "OK",
     service: "Neo4j",
   });
+});
+
+app.post("/api/health/neo4j/test-node", async (_req, res) => {
+  try {
+    await createTestNode();
+
+    res.json({
+      status: "OK",
+      message: "Test node created successfully",
+    });
+  } catch (error) {
+    console.error("Failed to create Neo4j test node:", error);
+
+    res.status(500).json({
+      status: "ERROR",
+      message: "Failed to create Neo4j test node",
+    });
+  }
 });
 
 // Start server
