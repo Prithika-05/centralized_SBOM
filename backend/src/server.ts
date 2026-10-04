@@ -6,8 +6,10 @@ import {
   testNeo4jConnection,
   createTestNode,
 } from "./services/neo4jService.js";
-import { getDirectDependencies } from "./services/dependencyService.js";
-
+import {
+  getDirectDependencies,
+  getTransitiveDependencies,
+} from "./services/dependencyService.js";
 
 dotenv.config();
 
@@ -92,6 +94,28 @@ app.get(
   }
 );
 
+app.get(
+  "/api/components/:componentId/dependencies/transitive",
+  async (req, res) => {
+    try {
+      const componentId = req.params.componentId;
+
+      const result = await getTransitiveDependencies(componentId);
+
+      res.json(result);
+    } catch (error) {
+      console.error(
+        "Failed to retrieve transitive dependencies:",
+        error
+      );
+
+      res.status(500).json({
+        status: "ERROR",
+        message: "Failed to retrieve transitive dependencies",
+      });
+    }
+  }
+);
 
 app.use("/api/sboms", sbomRoutes);
 
