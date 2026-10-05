@@ -10,6 +10,8 @@ import {
   getDirectDependencies,
   getTransitiveDependencies,
 } from "./services/dependencyService.js";
+import { testNVDConnection } from "./services/nvdService.js";
+import { findVulnerabilities } from "./services/vulnerabilityService.js";
 
 dotenv.config();
 
@@ -112,6 +114,49 @@ app.get(
       res.status(500).json({
         status: "ERROR",
         message: "Failed to retrieve transitive dependencies",
+      });
+    }
+  }
+);
+
+app.get("/api/health/nvd", async (_req, res) => {
+  const connected = await testNVDConnection();
+
+  if (!connected) {
+    return res.status(500).json({
+      status: "ERROR",
+      service: "NVD",
+    });
+  }
+
+  res.json({
+    status: "OK",
+    service: "NVD",
+  });
+});
+
+app.get(
+  "/api/components/:componentId/vulnerabilities",
+  async (req, res) => {
+    try {
+      const componentId = req.params.componentId;
+
+      const result = await findVulnerabilities(
+        componentId,
+        req.query.name as string,
+        req.query.version as string
+      );
+
+      res.json(result);
+    } catch (error) {
+      console.error(
+        "Failed to retrieve vulnerabilities:",
+        error
+      );
+
+      res.status(500).json({
+        status: "ERROR",
+        message: "Failed to retrieve vulnerabilities",
       });
     }
   }
