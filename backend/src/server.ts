@@ -19,6 +19,8 @@ import {
 import { correlateComponent } from "./services/vulnerabilityCorrelationService.js";
 import { findImpactedComponents } from "./services/impactAnalysisService.js";
 import { validateCRA } from "./services/craValidationService.js";
+import { analyzeComponent } from "./services/analysisService.js";
+import { generateSecurityReport } from "./services/reportService.js";
 
 
 dotenv.config();
@@ -299,6 +301,66 @@ app.get("/api/components/:componentId/cra-validation", async (req, res) => {
     res.status(500).json({
       status: "ERROR",
       message: "CRA validation failed",
+    });
+  }
+});
+
+app.get("/api/components/:componentId/analysis", async (req, res) => {
+  try {
+    const componentId = req.params.componentId;
+    const name = req.query.name as string;
+    const version = req.query.version as string;
+
+    if (!name || !version) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Package name and version are required",
+      });
+    }
+
+    const result = await analyzeComponent(
+      componentId,
+      name,
+      version
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.error("Component analysis failed:", error);
+
+    res.status(500).json({
+      status: "ERROR",
+      message: "Component analysis failed",
+    });
+  }
+});
+
+app.get("/api/components/:componentId/report", async (req, res) => {
+  try {
+    const componentId = req.params.componentId;
+    const name = req.query.name as string;
+    const version = req.query.version as string;
+
+    if (!name || !version) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Package name and version are required",
+      });
+    }
+
+    const report = await generateSecurityReport(
+      componentId,
+      name,
+      version
+    );
+
+    res.json(report);
+  } catch (error) {
+    console.error("Failed to generate security report:", error);
+
+    res.status(500).json({
+      status: "ERROR",
+      message: "Failed to generate security report",
     });
   }
 });
