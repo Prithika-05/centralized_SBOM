@@ -12,6 +12,12 @@ import {
 } from "./services/dependencyService.js";
 import { testNVDConnection } from "./services/nvdService.js";
 import { findVulnerabilities } from "./services/vulnerabilityService.js";
+import { testOSVConnection } from "./services/osvService.js";
+import {
+  findAllVulnerabilities,
+} from "./services/combinedVulnerabilityService.js";
+import { correlateComponent } from "./services/vulnerabilityCorrelationService.js";
+
 
 dotenv.config();
 
@@ -161,6 +167,92 @@ app.get(
     }
   }
 );
+
+app.get("/api/health/osv", async (_req, res) => {
+  const connected = await testOSVConnection();
+
+  if (!connected) {
+    return res.status(500).json({
+      status: "ERROR",
+      service: "OSV",
+    });
+  }
+
+  res.json({
+    status: "OK",
+    service: "OSV",
+  });
+});
+
+app.get(
+  "/api/components/:componentId/vulnerabilities/all",
+  async (req, res) => {
+    try {
+      const componentId = req.params.componentId;
+      const name = req.query.name as string;
+      const version = req.query.version as string;
+
+      if (!name || !version) {
+        return res.status(400).json({
+          status: "ERROR",
+          message: "Package name and version are required",
+        });
+      }
+
+      const vulnerabilities = await findAllVulnerabilities(
+        name,
+        version
+      );
+
+      res.json({
+        componentId,
+        name,
+        version,
+        vulnerabilities,
+      });
+    } catch (error) {
+      console.error(
+        "Failed to retrieve combined vulnerabilities:",
+        error
+      );
+
+      res.status(500).json({
+        status: "ERROR",
+        message: "Failed to retrieve vulnerabilities",
+      });
+    }
+  }
+);
+
+app.get("/api/components/:componentId/vulnerability-analysis", async (req, res) => {
+  try {
+    const componentId = req.params.componentId;
+    const name = req.query.name as string;
+    const version = req.query.version as string;
+
+    if (!name || !version) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Package name and version are required",
+      });
+    }
+
+    const result = await correlateComponent(
+      componentId,
+      name,
+      version
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to correlate vulnerabilities:", error);
+
+    res.status(500).json({
+      status: "ERROR",
+      message: "Failed to correlate vulnerabilities",
+    });
+  }
+});
 
 app.use("/api/sboms", sbomRoutes);
 
