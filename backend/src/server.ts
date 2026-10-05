@@ -17,6 +17,8 @@ import {
   findAllVulnerabilities,
 } from "./services/combinedVulnerabilityService.js";
 import { correlateComponent } from "./services/vulnerabilityCorrelationService.js";
+import { findImpactedComponents } from "./services/impactAnalysisService.js";
+import { validateCRA } from "./services/craValidationService.js";
 
 
 dotenv.config();
@@ -250,6 +252,53 @@ app.get("/api/components/:componentId/vulnerability-analysis", async (req, res) 
     res.status(500).json({
       status: "ERROR",
       message: "Failed to correlate vulnerabilities",
+    });
+  }
+});
+
+app.get("/api/components/:componentId/impact-analysis", async (req, res) => {
+  try {
+    const componentId = req.params.componentId;
+
+    const impactedComponents = await findImpactedComponents(componentId);
+
+    res.json({
+      componentId,
+      impactedComponents,
+    });
+  } catch (error) {
+    console.error("Failed to perform impact analysis:", error);
+
+    res.status(500).json({
+      status: "ERROR",
+      message: "Failed to perform impact analysis",
+    });
+  }
+});
+
+app.get("/api/components/:componentId/cra-validation", async (req, res) => {
+  try {
+    const vulnerabilityCount = Number(req.query.vulnerabilityCount || 0);
+    const hasDependencies = req.query.hasDependencies === "true";
+    const hasImpactAnalysis = req.query.hasImpactAnalysis === "true";
+
+    const result = validateCRA(
+      true,
+      vulnerabilityCount,
+      hasDependencies,
+      hasImpactAnalysis
+    );
+
+    res.json({
+      componentId: req.params.componentId,
+      ...result,
+    });
+  } catch (error) {
+    console.error("CRA validation failed:", error);
+
+    res.status(500).json({
+      status: "ERROR",
+      message: "CRA validation failed",
     });
   }
 });
