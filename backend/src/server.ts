@@ -358,7 +358,7 @@ app.get("/api/components/:componentId/report", async (req, res) => {
   } catch (error) {
     console.error("Failed to generate security report:", error);
 
-    res.status(500).json({
+    res.status(500).json({  
       status: "ERROR",
       message: "Failed to generate security report",
     });
