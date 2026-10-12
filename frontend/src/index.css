@@ -1,8 +1,8 @@
+/* src/index.css */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@fontsource-variable/geist";
 
-/* Define shadcn-compatible theme variables */
 @theme inline {
   --font-sans: 'Geist Variable', sans-serif;
   --color-background: var(--background);
@@ -23,6 +23,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --radius: 0.625rem;
 }
 
 :root {
@@ -44,7 +45,6 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
 }
 
 .dark {

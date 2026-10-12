@@ -1,3 +1,4 @@
+/* app.css - Modern SBOM Dashboard Styles */
 
 #root {
   min-height: 100vh;
@@ -9,67 +10,191 @@
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f3f5f8;
-  color: #202938;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f8fafc;
+  color: #1e293b;
+  line-height: 1.6;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 48px 24px;
 }
 
 header {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  text-align: center;
 }
 
 header h1 {
-  font-size: 30px;
+  font-size: 32px;
+  font-weight: 700;
   margin-bottom: 12px;
+  color: #0f172a;
+  letter-spacing: -0.5px;
 }
 
 header p {
-  color: #596579;
+  color: #64748b;
+  font-size: 16px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.upload-card {
+/* Card Base Style */
+.card {
   background: white;
-  padding: 28px;
-  border-radius: 10px;
-  border: 1px solid #dce2ea;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s ease;
 }
 
-.upload-card h2 {
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.card h2 {
   margin-top: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-input[type="file"] {
+.card p {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* Upload Zone */
+.upload-zone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f8fafc;
+  margin-top: 8px;
+}
+
+.upload-zone:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.upload-zone input[type="file"] {
+  display: none; /* Hide default ugly file input */
+}
+
+.upload-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
   display: block;
-  margin: 24px 0;
-  max-width: 100%;
 }
 
-button {
-  background: #2457c5;
+.upload-text {
+  font-weight: 500;
+  color: #334155;
+  display: block;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 6px;
+  display: block;
+}
+
+/* Form Inputs */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #334155;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  background: #fff;
+  color: #1e293b;
+}
+
+.input-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Buttons */
+.btn-primary {
+  background: #2563eb;
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 12px 20px;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-button:disabled {
-  opacity: 0.6;
+.btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
-.result {
+/* Results Terminal */
+.result-terminal {
   margin-top: 24px;
-  padding: 16px;
-  background: #f3f5f8;
-  border-radius: 6px;
+  padding: 20px;
+  background: #1e293b;
+  border-radius: 12px;
   overflow-x: auto;
   white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #4ade80;
+  min-height: 120px;
+  border: 1px solid #334155;
+}
+
+.result-terminal .placeholder {
+  color: #64748b;
+  font-style: italic;
 }

@@ -5,6 +5,7 @@
       "@/*": ["./*"]
     },
     "jsx": "react-jsx",
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "6.0",
+    "noUncheckedSideEffectImports": false
   }
 }
