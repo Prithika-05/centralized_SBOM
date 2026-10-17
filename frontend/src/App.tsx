@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal, UploadCloud, FileJson, CheckCircle2, AlertCircle, ShieldAlert} from "lucide-react";
+import { normalizeSeverity } from "./utils/severity";
+import "./App.css"; 
 
 function App() {
   const [file, setFile] = useState<File | null>(null);
@@ -119,59 +121,77 @@ function App() {
     return value as Record<string, any>;
   }
 
+  function renderVulnerabilityList(
+    source: "nvd" | "osv"
+  ) {
+    const vulnerabilityAnalysis = getAnalysisSection(
+      "vulnerabilityAnalysis"
+    );
+
+    const vulnerabilities =
+      vulnerabilityAnalysis?.vulnerabilities?.[source];
+
+    if (!Array.isArray(vulnerabilities) || vulnerabilities.length === 0) {
+      return <p>No findings returned by {source.toUpperCase()}.</p>;
+    }
+
+    return (
+      <div className="vulnerability-list">
+        {vulnerabilities.map((vulnerability: any, index: number) => (
+          <article
+            className="vulnerability-item"
+            key={`${vulnerability.id ?? source}-${index}`}
+          >
+            <div className="vulnerability-heading">
+              <strong>{vulnerability.id ?? "Unknown ID"}</strong>
+              <span className="severity-label">
+                {normalizeSeverity(vulnerability.severity)}
+              </span>
+            </div>
+
+            <p>
+              {vulnerability.description ??
+                vulnerability.summary ??
+                "No description provided."}
+            </p>
+
+            {vulnerability.cvssScore !== undefined && (
+              <p>CVSS score: {vulnerability.cvssScore}</p>
+            )}
+          </article>
+        ))}
+      </div>
+    );
+  }
+
+  function renderImpactedComponents() {
+    const impactAnalysis = getAnalysisSection("impactAnalysis");
+    const components = impactAnalysis?.impactedComponents;
+
+    if (!Array.isArray(components) || components.length === 0) {
+      return <p>No impacted components were returned.</p>;
+    }
+
+    return (
+      <div className="vulnerability-list">
+        {components.map((component: any, index: number) => (
+          <article
+            className="vulnerability-item"
+            key={`${component.id ?? component.name}-${index}`}
+          >
+            <strong>{component.name ?? "Unknown component"}</strong>
+            <p>Version: {component.version ?? "Unknown"}</p>
+            <p>Component ID: {component.id ?? "Unavailable"}</p>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
   return (
     // CENTERED LAYOUT CONTAINER
     <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
       
-      {/* Inline Styles for Dashboard Grid */}
-      <style>{`
-        .dashboard-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1rem;
-          margin-top: 1rem;
-        }
-        .dashboard-card {
-          background: rgba(0, 0, 0, 0.6);
-          border: 1px solid rgba(6, 182, 212, 0.2);
-          border-radius: 0.5rem;
-          padding: 1rem;
-          color: #22d3ee;
-          font-family: monospace;
-          font-size: 0.75rem;
-        }
-        .dashboard-card h3 {
-          color: #22d3ee;
-          font-weight: bold;
-          text-transform: uppercase;
-          margin-bottom: 0.5rem;
-          font-size: 0.875rem;
-          border-bottom: 1px solid rgba(6, 182, 212, 0.2);
-          padding-bottom: 0.25rem;
-        }
-        .dashboard-card p {
-          margin-bottom: 0.25rem;
-          opacity: 0.8;
-        }
-        .raw-details summary {
-          cursor: pointer;
-          font-weight: bold;
-          margin-bottom: 0.5rem;
-          list-style: none;
-        }
-        .raw-details summary::-webkit-details-marker {
-          display: none;
-        }
-        .raw-details pre {
-          background: rgba(0, 0, 0, 0.8);
-          padding: 0.5rem;
-          border-radius: 0.25rem;
-          border: 1px solid rgba(6, 182, 212, 0.1);
-          max-height: 200px;
-          overflow-y: auto;
-        }
-      `}</style>
-
       {/* Ambient Glow Effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-green-500/5 rounded-full blur-[100px] pointer-events-none" />
       
@@ -365,7 +385,7 @@ function App() {
             {/* Updated Dashboard View */}
             {analysisResult !== null && (
               <div className="dashboard-grid">
-                <article className="dashboard-card">
+                <article className="dashboard-card col-span-full">
                   <h3>Vulnerability Analysis</h3>
                   {getAnalysisSection("vulnerabilityAnalysis") ? (
                     <>
@@ -383,6 +403,12 @@ function App() {
                         {getAnalysisSection("vulnerabilityAnalysis")
                           ?.vulnerabilities?.osv?.length ?? 0}
                       </p>
+                      
+                      <h4>NVD Findings</h4>
+                      {renderVulnerabilityList("nvd")}
+
+                      <h4>OSV Findings</h4>
+                      {renderVulnerabilityList("osv")}
                     </>
                   ) : (
                     <p>Vulnerability results are unavailable.</p>
@@ -391,11 +417,14 @@ function App() {
 
                 <article className="dashboard-card">
                   <h3>Impact Analysis</h3>
+
                   <p>
                     Potentially impacted components:{" "}
                     {getAnalysisSection("impactAnalysis")
                       ?.impactedComponents?.length ?? 0}
                   </p>
+
+                  {renderImpactedComponents()}
                 </article>
 
                 <article className="dashboard-card">
