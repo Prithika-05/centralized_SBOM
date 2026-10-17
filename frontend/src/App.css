@@ -198,3 +198,19 @@ header p {
   color: #64748b;
   font-style: italic;
 }
+
+.upload-card label {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.upload-card input[type="text"] {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cbd3df;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
