@@ -214,3 +214,38 @@ header p {
   border-radius: 6px;
   margin-bottom: 12px;
 }
+
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.dashboard-card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #dce2ea;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.dashboard-card h3 {
+  margin-top: 0;
+}
+
+.raw-details {
+  grid-column: 1 / -1;
+}
+
+.raw-details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

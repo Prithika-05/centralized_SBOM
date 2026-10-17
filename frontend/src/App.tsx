@@ -100,10 +100,78 @@ function App() {
     }
   }
 
+  
+  function getAnalysisSection(key: string): Record<string, any> | null {
+    if (
+      typeof analysisResult !== "object" ||
+      analysisResult === null ||
+      !(key in analysisResult)
+    ) {
+      return null;
+    }
+
+    const value = (analysisResult as Record<string, unknown>)[key];
+
+    if (typeof value !== "object" || value === null) {
+      return null;
+    }
+
+    return value as Record<string, any>;
+  }
+
   return (
     // CENTERED LAYOUT CONTAINER
     <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
       
+      {/* Inline Styles for Dashboard Grid */}
+      <style>{`
+        .dashboard-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+        .dashboard-card {
+          background: rgba(0, 0, 0, 0.6);
+          border: 1px solid rgba(6, 182, 212, 0.2);
+          border-radius: 0.5rem;
+          padding: 1rem;
+          color: #22d3ee;
+          font-family: monospace;
+          font-size: 0.75rem;
+        }
+        .dashboard-card h3 {
+          color: #22d3ee;
+          font-weight: bold;
+          text-transform: uppercase;
+          margin-bottom: 0.5rem;
+          font-size: 0.875rem;
+          border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+          padding-bottom: 0.25rem;
+        }
+        .dashboard-card p {
+          margin-bottom: 0.25rem;
+          opacity: 0.8;
+        }
+        .raw-details summary {
+          cursor: pointer;
+          font-weight: bold;
+          margin-bottom: 0.5rem;
+          list-style: none;
+        }
+        .raw-details summary::-webkit-details-marker {
+          display: none;
+        }
+        .raw-details pre {
+          background: rgba(0, 0, 0, 0.8);
+          padding: 0.5rem;
+          border-radius: 0.25rem;
+          border: 1px solid rgba(6, 182, 212, 0.1);
+          max-height: 200px;
+          overflow-y: auto;
+        }
+      `}</style>
+
       {/* Ambient Glow Effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-green-500/5 rounded-full blur-[100px] pointer-events-none" />
       
@@ -294,14 +362,72 @@ function App() {
               </Alert>
             )}
 
+            {/* Updated Dashboard View */}
             {analysisResult !== null && (
-              <div className="rounded border border-cyan-500/20 bg-black/80 p-3 overflow-x-auto mt-2">
-                <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-cyan-500 uppercase tracking-wider">
-                  <Terminal className="h-3 w-3" /> Analysis Output
-                </div>
-                <pre className="text-[10px] font-mono whitespace-pre-wrap break-all text-cyan-300/70 bg-black/50 p-2 rounded border border-cyan-500/10">
-                  {JSON.stringify(analysisResult, null, 2)}
-                </pre>
+              <div className="dashboard-grid">
+                <article className="dashboard-card">
+                  <h3>Vulnerability Analysis</h3>
+                  {getAnalysisSection("vulnerabilityAnalysis") ? (
+                    <>
+                      <p>
+                        Severity:{" "}
+                        {getAnalysisSection("vulnerabilityAnalysis")?.severity ?? "Unknown"}
+                      </p>
+                      <p>
+                        NVD findings:{" "}
+                        {getAnalysisSection("vulnerabilityAnalysis")
+                          ?.vulnerabilities?.nvd?.length ?? 0}
+                      </p>
+                      <p>
+                        OSV findings:{" "}
+                        {getAnalysisSection("vulnerabilityAnalysis")
+                          ?.vulnerabilities?.osv?.length ?? 0}
+                      </p>
+                    </>
+                  ) : (
+                    <p>Vulnerability results are unavailable.</p>
+                  )}
+                </article>
+
+                <article className="dashboard-card">
+                  <h3>Impact Analysis</h3>
+                  <p>
+                    Potentially impacted components:{" "}
+                    {getAnalysisSection("impactAnalysis")
+                      ?.impactedComponents?.length ?? 0}
+                  </p>
+                </article>
+
+                <article className="dashboard-card">
+                  <h3>CRA Validation</h3>
+                  {getAnalysisSection("craValidation") ? (
+                    <>
+                      <p>
+                        Result:{" "}
+                        {getAnalysisSection("craValidation")?.compliant
+                          ? "All prototype checks passed"
+                          : "Some prototype checks failed"}
+                      </p>
+                      <p>
+                        Checks passed:{" "}
+                        {getAnalysisSection("craValidation")?.results?.filter(
+                          (item: any) => item.passed
+                        ).length ?? 0}
+                        {" / "}
+                        {getAnalysisSection("craValidation")?.results?.length ?? 0}
+                      </p>
+                    </>
+                  ) : (
+                    <p>CRA results are unavailable.</p>
+                  )}
+                </article>
+
+                <details className="dashboard-card raw-details col-span-full">
+                  <summary>View complete analysis response</summary>
+                  <pre className="result">
+                    {JSON.stringify(analysisResult, null, 2)}
+                  </pre>
+                </details>
               </div>
             )}
           </CardContent>
