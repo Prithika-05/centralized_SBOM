@@ -37,9 +37,10 @@ export async function searchOSV(
   return (data.vulns || []).map((vulnerability: any) => ({
     id: vulnerability.id,
     summary: vulnerability.summary || "",
-    severity: vulnerability.severity?.[0]?.score
-      ? vulnerability.severity[0].score
-      : undefined,
+    severity:
+    vulnerability.database_specific?.severity ??
+    vulnerability.severity?.[0]?.score ??
+    undefined,
   }));
 }
 

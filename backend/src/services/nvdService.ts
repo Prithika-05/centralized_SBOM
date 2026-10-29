@@ -19,10 +19,9 @@ export async function searchNVD(
 
   const apiKey = process.env.NVD_API_KEY;
 
-  url.searchParams.set(
-    "keywordSearch",
-    `${packageName} ${version}`
-  );
+url.searchParams.set("keywordSearch", "log4j");
+
+  console.log("NVD request URL:", url.toString());
 
   const response = await fetch(url, {
     headers: apiKey
@@ -39,6 +38,15 @@ export async function searchNVD(
   }
 
   const data = await response.json();
+
+  const log4Shell = data.vulnerabilities.find(
+    (item: any) => item.cve?.id === "CVE-2021-44228"
+  );
+
+  console.dir(
+    log4Shell?.cve?.configurations,
+    { depth: null }
+  );
 
   return data.vulnerabilities.map((item: any) => {
     const cve = item.cve;
