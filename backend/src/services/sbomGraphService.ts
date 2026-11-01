@@ -29,18 +29,17 @@ export async function storeSBOM(
           MATCH (s:SBOM)
           WHERE elementId(s) = $sbomId
 
-          CREATE (c:Component {
-            id: $id,
-            name: $name,
-            version: $version,
-            supplier: $supplier,
-            packageId: $packageId,
-            ecosystem: $ecosystem,
-            licenses: $licenses,
-            hashes: $hashes
-          })
+          MERGE (c:Component {id: $id})
+          SET
+            c.name = $name,
+            c.version = $version,
+            c.supplier = $supplier,
+            c.packageId = $packageId,
+            c.ecosystem = $ecosystem,
+            c.licenses = $licenses,
+            c.hashes = $hashes
 
-          CREATE (s)-[:CONTAINS]->(c)
+          MERGE (s)-[:CONTAINS]->(c)
           `,
           {
             sbomId,
@@ -64,7 +63,7 @@ export async function storeSBOM(
             MATCH (source:Component {id: $sourceId})
             MATCH (target:Component {id: $targetId})
 
-            CREATE (source)-[:DEPENDS_ON]->(target)
+            MERGE (source)-[:DEPENDS_ON]->(target)
             `,
             {
               sourceId: component.id,
