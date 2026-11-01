@@ -32,3 +32,37 @@ export async function findImpactedComponents(
     await session.close();
   }
 }
+
+
+export async function debugComponentGraph(componentId: string) {
+  const session = neo4jDriver.session();
+
+  try {
+    const result = await session.run(
+      `
+      MATCH (c:Component {id: $componentId})
+      OPTIONAL MATCH (c)-[r:DEPENDS_ON]-(connected:Component)
+      RETURN
+        c.id AS componentId,
+        count(r) AS relationshipCount,
+        collect({
+          id: connected.id,
+          name: connected.name,
+          direction: CASE
+            WHEN startNode(r) = c THEN 'OUTGOING'
+            ELSE 'INCOMING'
+          END
+        }) AS connectedComponents
+      `,
+      { componentId }
+    );
+
+    return result.records.map((record) => ({
+      componentId: record.get("componentId"),
+      relationshipCount: record.get("relationshipCount").toNumber(),
+      connectedComponents: record.get("connectedComponents"),
+    }));
+  } finally {
+    await session.close();
+  }
+}

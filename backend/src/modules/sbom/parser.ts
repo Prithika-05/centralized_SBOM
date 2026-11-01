@@ -25,6 +25,7 @@ export function parseCycloneDX(data: any): ParsedSBOM {
     };
   }
 
+  // First, parse all components.
   for (const component of data.components) {
     const licenses: string[] = [];
 
@@ -53,14 +54,41 @@ export function parseCycloneDX(data: any): ParsedSBOM {
       version: component.version || "Unknown",
       supplier: component.supplier?.name,
       packageId: component.purl,
-      dependencies: Array.isArray(component.dependencies)
-      ? component.dependencies
-          .map((dependency: any) => dependency.ref)
-          .filter((ref: any): ref is string => typeof ref === "string")
-      : [],
+      dependencies: [],
       licenses,
       hashes,
     });
+  }
+
+  // Build a lookup from CycloneDX bom-ref values to components.
+  const componentMap = new Map<string, ParsedComponent>();
+
+  for (const component of data.components) {
+    if (component["bom-ref"]) {
+      const parsedComponent = components.find(
+        (item) =>
+          item.name === (component.name || "Unknown") &&
+          item.version === (component.version || "Unknown") &&
+          item.packageId === component.purl
+      );
+
+      if (parsedComponent) {
+        componentMap.set(component["bom-ref"], parsedComponent);
+      }
+    }
+  }
+
+  // Process top-level CycloneDX dependency relationships.
+  if (Array.isArray(data.dependencies)) {
+    for (const dependency of data.dependencies) {
+      const source = componentMap.get(dependency.ref);
+
+      if (!source || !Array.isArray(dependency.dependsOn)) {
+        continue;
+      }
+
+      source.dependencies.push(...dependency.dependsOn);
+    }
   }
 
   return {

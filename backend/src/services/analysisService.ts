@@ -1,5 +1,5 @@
 import { correlateComponent } from "./vulnerabilityCorrelationService.js";
-import { findImpactedComponents } from "./impactAnalysisService.js";
+import { findImpactedComponents, debugComponentGraph, } from "./impactAnalysisService.js";
 import { validateCRA } from "./craValidationService.js";
 
 export async function analyzeComponent(
@@ -14,6 +14,13 @@ export async function analyzeComponent(
   );
 
   const impactedComponents = await findImpactedComponents(componentId);
+
+  const graphDebug = await debugComponentGraph(componentId);
+
+  console.log(
+    "NEO4J GRAPH DIAGNOSTIC:",
+    JSON.stringify(graphDebug, null, 2)
+  );
 
   const vulnerabilityCount =
     vulnerabilityAnalysis.vulnerabilities.nvd.length +
