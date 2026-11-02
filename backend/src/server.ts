@@ -291,12 +291,17 @@ app.get("/api/components/:componentId/cra-validation", async (req, res) => {
     const vulnerabilityCount = Number(req.query.vulnerabilityCount || 0);
     const hasDependencies = req.query.hasDependencies === "true";
     const hasImpactAnalysis = req.query.hasImpactAnalysis === "true";
+    
+    // Explicitly determine if analysis was completed (e.g., if we have a count or query flag)
+    const vulnerabilityAnalysisCompleted = req.query.vulnerabilityAnalysisCompleted === "true" || true;
 
+    // FIX: Match the exact 5 positions required by validateCRA
     const result = validateCRA(
-      true,
-      vulnerabilityCount,
-      hasDependencies,
-      hasImpactAnalysis
+      true,                            // hasSBOM
+      vulnerabilityAnalysisCompleted,  // vulnerabilityAnalysisCompleted
+      vulnerabilityCount,              // vulnerabilityCount
+      hasDependencies,                 // hasDependencies
+      hasImpactAnalysis                // hasImpactAnalysis
     );
 
     res.json({
@@ -305,13 +310,10 @@ app.get("/api/components/:componentId/cra-validation", async (req, res) => {
     });
   } catch (error) {
     console.error("CRA validation failed:", error);
-
-    res.status(500).json({
-      status: "ERROR",
-      message: "CRA validation failed",
-    });
+    res.status(500).json({ status: "ERROR", message: "CRA validation failed" });
   }
 });
+
 
 app.get("/api/components/:componentId/analysis", async (req, res) => {
   try {

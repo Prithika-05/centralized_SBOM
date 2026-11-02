@@ -35,13 +35,7 @@ export async function searchOSV(
 
   const data = await response.json();
 
-  // FIX: Placed inside the mapping callback function context
   return (data.vulns || []).map((vulnerability: any) => {
-    console.log("OSV severity debug:", {
-      id: vulnerability.id,
-      databaseSeverity: vulnerability.database_specific?.severity,
-      severityArray: vulnerability.severity,
-    });
 
     return {
       id: vulnerability.id,

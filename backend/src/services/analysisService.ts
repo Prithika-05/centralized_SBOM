@@ -17,20 +17,20 @@ export async function analyzeComponent(
 
   const graphDebug = await debugComponentGraph(componentId);
 
-  console.log(
-    "NEO4J GRAPH DIAGNOSTIC:",
-    JSON.stringify(graphDebug, null, 2)
-  );
+  const hasDependencies = Array.isArray(graphDebug) && graphDebug.length > 0 && graphDebug.some(node => node.relationshipCount > 0);
+  const hasImpactAnalysis = Array.isArray(impactedComponents);
+  const vulnerabilityAnalysisCompleted = !!vulnerabilityAnalysis;
 
   const vulnerabilityCount =
-    vulnerabilityAnalysis.vulnerabilities.nvd.length +
-    vulnerabilityAnalysis.vulnerabilities.osv.length;
+    ((vulnerabilityAnalysis as any)?.vulnerabilities?.nvd?.length ?? 0) +
+    ((vulnerabilityAnalysis as any)?.vulnerabilities?.osv?.length ?? 0);
 
   const craValidation = validateCRA(
-    true,
-    vulnerabilityCount,
-    true,
-    true
+    true,                             // hasSBOM
+    vulnerabilityAnalysisCompleted,  // vulnerabilityAnalysisCompleted
+    vulnerabilityCount,               // vulnerabilityCount
+    hasDependencies,                  // hasDependencies
+    hasImpactAnalysis                 // hasImpactAnalysis
   );
 
   return {

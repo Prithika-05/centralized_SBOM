@@ -14,6 +14,7 @@ export interface CRAValidationSummary {
 
 export function validateCRA(
   hasSBOM: boolean,
+  vulnerabilityAnalysisCompleted: boolean,
   vulnerabilityCount: number,
   hasDependencies: boolean,
   hasImpactAnalysis: boolean
@@ -34,11 +35,14 @@ export function validateCRA(
         break;
 
       case "CRA-002":
-        passed = vulnerabilityCount >= 0;
-        message = passed
-          ? "Vulnerability analysis has been performed."
-          : "Vulnerability analysis has not been performed.";
+        passed =
+          vulnerabilityAnalysisCompleted &&
+          Number.isInteger(vulnerabilityCount) &&
+          vulnerabilityCount >= 0;
 
+        message = passed
+          ? `Vulnerability analysis completed; ${vulnerabilityCount} findings recorded.`
+          : "Vulnerability analysis did not complete successfully.";
         break;
 
       case "CRA-003":
