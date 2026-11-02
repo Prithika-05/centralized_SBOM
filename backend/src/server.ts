@@ -188,6 +188,7 @@ app.get("/api/health/osv", async (_req, res) => {
   });
 });
 
+// Look for this block around line 190-215 in src/server.ts
 app.get(
   "/api/components/:componentId/vulnerabilities/all",
   async (req, res) => {
@@ -195,6 +196,9 @@ app.get(
       const componentId = req.params.componentId;
       const name = req.query.name as string;
       const version = req.query.version as string;
+      // 1. Extract the missing parameters from the query string
+      const osvPackageName = req.query.osvPackageName as string || name;
+      const ecosystem = req.query.ecosystem as string || "Maven"; // Use your system's default fallback
 
       if (!name || !version) {
         return res.status(400).json({
@@ -203,9 +207,12 @@ app.get(
         });
       }
 
+      // 2. Pass all 4 required arguments to the service function
       const vulnerabilities = await findAllVulnerabilities(
         name,
-        version
+        version,
+        osvPackageName,
+        ecosystem
       );
 
       res.json({
@@ -227,6 +234,7 @@ app.get(
     }
   }
 );
+
 
 app.get("/api/components/:componentId/vulnerability-analysis", async (req, res) => {
   try {

@@ -8,7 +8,8 @@ export interface OSVVulnerability {
 
 export async function searchOSV(
   packageName: string,
-  version: string
+  version: string,
+  ecosystem: string
 ): Promise<OSVVulnerability[]> {
   const response = await fetch(
     "https://api.osv.dev/v1/query",
@@ -20,6 +21,7 @@ export async function searchOSV(
       body: JSON.stringify({
         package: {
           name: packageName,
+          ecosystem,
         },
         version,
       }),
@@ -38,17 +40,18 @@ export async function searchOSV(
     id: vulnerability.id,
     summary: vulnerability.summary || "",
     severity:
-    vulnerability.database_specific?.severity ??
-    vulnerability.severity?.[0]?.score ??
-    undefined,
+      vulnerability.database_specific?.severity ??
+      vulnerability.severity?.[0]?.score ??
+      undefined,
   }));
 }
 
 export async function testOSVConnection(): Promise<boolean> {
   try {
     const results = await searchOSV(
-      "log4j-core",
-      "2.14.1"
+      "org.apache.logging.log4j:log4j-core",
+      "2.14.1",
+      "Maven"
     );
 
     console.log(
