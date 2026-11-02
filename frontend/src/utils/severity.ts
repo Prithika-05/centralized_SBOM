@@ -16,6 +16,7 @@ export function normalizeSeverity(value: unknown): Severity {
   if (text === "CRITICAL") return "CRITICAL";
   if (text === "HIGH") return "HIGH";
   if (text === "MEDIUM") return "MEDIUM";
+  if (text === "MODERATE") return "MEDIUM";
   if (text === "LOW") return "LOW";
 
   // Accept a numeric CVSS base score.
