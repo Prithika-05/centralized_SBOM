@@ -5,7 +5,6 @@ export interface OSVVulnerability {
   cvssScore?: number;
 }
 
-
 export async function searchOSV(
   packageName: string,
   version: string,
@@ -36,14 +35,23 @@ export async function searchOSV(
 
   const data = await response.json();
 
-  return (data.vulns || []).map((vulnerability: any) => ({
-    id: vulnerability.id,
-    summary: vulnerability.summary || "",
-    severity:
-      vulnerability.database_specific?.severity ??
-      vulnerability.severity?.[0]?.score ??
-      undefined,
-  }));
+  // FIX: Placed inside the mapping callback function context
+  return (data.vulns || []).map((vulnerability: any) => {
+    console.log("OSV severity debug:", {
+      id: vulnerability.id,
+      databaseSeverity: vulnerability.database_specific?.severity,
+      severityArray: vulnerability.severity,
+    });
+
+    return {
+      id: vulnerability.id,
+      summary: vulnerability.summary || "",
+      severity:
+        vulnerability.database_specific?.severity ??
+        vulnerability.severity?.[0]?.score ??
+        undefined,
+    };
+  });
 }
 
 export async function testOSVConnection(): Promise<boolean> {
