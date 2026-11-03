@@ -11,7 +11,8 @@ export async function storeSBOM(
       const result = await tx.run(
         `
         CREATE (s:SBOM {
-          format: $format
+          format: $format,
+          validated: true
         })
         RETURN elementId(s) AS sbomId
         `,
@@ -73,6 +74,29 @@ export async function storeSBOM(
         }
       }
     });
+  } finally {
+    await session.close();
+  }
+}
+
+export async function hasValidatedSBOM(
+  componentId: string
+): Promise<boolean> {
+  const session = neo4jDriver.session();
+
+  try {
+    const result = await session.executeRead(async (tx) => {
+      return tx.run(
+        `
+        MATCH (s:SBOM)-[:CONTAINS]->(c:Component {id: $componentId})
+        WHERE s.validated = true
+        RETURN count(s) > 0 AS validated
+        `,
+        { componentId }
+      );
+    });
+
+    return result.records[0].get("validated");
   } finally {
     await session.close();
   }
