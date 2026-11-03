@@ -1,5 +1,8 @@
 import { correlateComponent } from "./vulnerabilityCorrelationService.js";
-import { findImpactedComponents, debugComponentGraph, } from "./impactAnalysisService.js";
+import {
+  findImpactedComponents,
+  hasDependencyRelationships,
+} from "./impactAnalysisService.js";
 import { validateCRA } from "./craValidationService.js";
 import { hasValidatedSBOM } from "./sbomGraphService.js";
 
@@ -16,10 +19,11 @@ export async function analyzeComponent(
 
   const impactedComponents = await findImpactedComponents(componentId);
 
-  const graphDebug = await debugComponentGraph(componentId);
-
-  const hasDependencies = Array.isArray(graphDebug) && graphDebug.length > 0 && graphDebug.some(node => node.relationshipCount > 0);
-  const hasImpactAnalysis = Array.isArray(impactedComponents);
+  const hasDependencies =
+  await hasDependencyRelationships(componentId);
+  const hasImpactAnalysis =
+    Array.isArray(impactedComponents) &&
+    impactedComponents.length > 0;  
   const vulnerabilityAnalysisCompleted = !!vulnerabilityAnalysis;
   const hasSBOM = await hasValidatedSBOM(componentId);
 

@@ -66,3 +66,24 @@ export async function debugComponentGraph(componentId: string) {
     await session.close();
   }
 }
+
+export async function hasDependencyRelationships(
+  componentId: string
+): Promise<boolean> {
+  const session = neo4jDriver.session();
+
+  try {
+    const result = await session.run(
+      `
+      MATCH (c:Component {id: $componentId})
+      OPTIONAL MATCH (c)-[r:DEPENDS_ON]-()
+      RETURN count(r) > 0 AS hasDependencies
+      `,
+      { componentId }
+    );
+
+    return result.records[0].get("hasDependencies");
+  } finally {
+    await session.close();
+  }
+}
