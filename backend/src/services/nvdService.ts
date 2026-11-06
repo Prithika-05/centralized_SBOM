@@ -11,7 +11,7 @@ export interface NVDVulnerability {
 }
 
 // Compare common software version formats, including versions with qualifiers.
-function compareVersions(a: string, b: string): number {
+export function compareVersions(a: string, b: string): number {
   const tokenize = (value: string): (number | string)[] =>
     value.match(/\d+|[a-zA-Z]+/g)?.map((part) =>
       /^\d+$/.test(part) ? Number(part) : part.toLowerCase()
@@ -43,13 +43,32 @@ function compareVersions(a: string, b: string): number {
   return 0;
 }
 
+// Map supported package names to their corresponding CPE identities.
+const CPE_IDENTITIES: Record<
+  string,
+  { vendor: string; products: string[] }
+> = {
+  "log4j-core": {
+    vendor: "apache",
+    products: ["log4j-core", "log4j"],
+  },
+  "log4j": {
+    vendor: "apache",
+    products: ["log4j"],
+  },
+};
+
+// Check whether an installed package version falls within
+// the affected version range specified by an NVD CPE match.
 function matchesAffectedVersion(
   cpeMatch: any,
-  installedVersion: string
+  installedVersion: string,
+  packageName: string
 ): boolean {
   if (cpeMatch.vulnerable !== true) return false;
 
   const criteria = cpeMatch.criteria || cpeMatch.cpe23Uri;
+
   if (typeof criteria !== "string") return false;
 
   const parts = criteria.split(":");
@@ -59,9 +78,19 @@ function matchesAffectedVersion(
   const product = parts[4]?.toLowerCase();
   const cpeVersion = parts[5];
 
-  // Match Apache Log4j CPEs, not unrelated products mentioning Log4j.
-  if (vendor !== "apache") return false;
-  if (product !== "log4j" && product !== "log4j-core") return false;
+  // Identify the expected CPE identity for the installed package.
+  const identity = CPE_IDENTITIES[
+    packageName.toLowerCase().trim()
+  ];
+
+  if (!identity) return false;
+
+  // Match the expected vendor and product.
+  if (vendor !== identity.vendor) return false;
+
+  if (!product || !identity.products.includes(product)) {
+    return false;
+  }
 
   const hasRange =
     cpeMatch.versionStartIncluding !== undefined ||
@@ -69,39 +98,56 @@ function matchesAffectedVersion(
     cpeMatch.versionEndIncluding !== undefined ||
     cpeMatch.versionEndExcluding !== undefined;
 
-  // If there is no range, require an exact CPE version.
+  // If there is no version range, require an exact CPE version.
   if (!hasRange) {
-    if (!cpeVersion || cpeVersion === "*" || cpeVersion === "-") {
-      return false;
-    }
-
-    return compareVersions(installedVersion, cpeVersion) === 0;
+  if (cpeVersion === "*") {
+    return true;
   }
 
+  if (!cpeVersion || cpeVersion === "-") {
+    return false;
+  }
+
+  return compareVersions(installedVersion, cpeVersion) === 0;
+}
+  // Check the lower version boundary.
   if (
     cpeMatch.versionStartIncluding &&
-    compareVersions(installedVersion, cpeMatch.versionStartIncluding) < 0
+    compareVersions(
+      installedVersion,
+      cpeMatch.versionStartIncluding
+    ) < 0
   ) {
     return false;
   }
 
   if (
     cpeMatch.versionStartExcluding &&
-    compareVersions(installedVersion, cpeMatch.versionStartExcluding) <= 0
+    compareVersions(
+      installedVersion,
+      cpeMatch.versionStartExcluding
+    ) <= 0
   ) {
     return false;
   }
 
+  // Check the upper version boundary.
   if (
     cpeMatch.versionEndIncluding &&
-    compareVersions(installedVersion, cpeMatch.versionEndIncluding) > 0
+    compareVersions(
+      installedVersion,
+      cpeMatch.versionEndIncluding
+    ) > 0
   ) {
     return false;
   }
 
   if (
     cpeMatch.versionEndExcluding &&
-    compareVersions(installedVersion, cpeMatch.versionEndExcluding) >= 0
+    compareVersions(
+      installedVersion,
+      cpeMatch.versionEndExcluding
+    ) >= 0
   ) {
     return false;
   }
@@ -110,10 +156,10 @@ function matchesAffectedVersion(
 }
 
 // Recursively inspect NVD configuration nodes and their CPE matches.
-
 function hasMatchingCPE(
   configuration: any,
-  installedVersion: string
+  installedVersion: string,
+  packageName: string
 ): boolean {
   const nodes = configuration.nodes || [];
 
@@ -122,7 +168,7 @@ function hasMatchingCPE(
   }
 
   const results = nodes.map((node: any) =>
-    evaluateNode(node, installedVersion)
+    evaluateNode(node, installedVersion, packageName)
   );
 
   const operator = String(
@@ -144,17 +190,35 @@ function hasMatchingCPE(
   return result;
 }
 
+// Search the NVD database for vulnerabilities affecting
+// the specified package and installed version.
 export async function searchNVD(
   packageName: string,
   version: string
 ): Promise<NVDVulnerability[]> {
+  const normalizedPackageName = packageName
+    .toLowerCase()
+    .trim();
+
+  // Only search for supported Log4j packages.
+  if (
+    normalizedPackageName !== "log4j-core" &&
+    normalizedPackageName !== "log4j"
+  ) {
+    console.log(
+      `Skipping NVD Log4j search for unsupported package: ${packageName}`
+    );
+
+    return [];
+  }
+
   const url = new URL(
     "https://services.nvd.nist.gov/rest/json/cves/2.0"
   );
 
   const apiKey = process.env.NVD_API_KEY;
 
-  // Broad discovery search; applicability is checked using CPE data below.
+  // Broad discovery search; applicability is checked using CPE data.
   url.searchParams.set("keywordSearch", "log4j");
 
   console.log("NVD request URL:", url.toString());
@@ -164,25 +228,33 @@ export async function searchNVD(
   });
 
   if (!response.ok) {
-    throw new Error(`NVD API request failed: ${response.status}`);
+    throw new Error(
+      `NVD API request failed: ${response.status}`
+    );
   }
 
   const data = await response.json();
 
-  const matchingVulnerabilities = (data.vulnerabilities || []).filter(
-    (item: any) => {
-      const configurations = item.cve?.configurations || [];
+  // Filter vulnerabilities using package identity and version matching.
+  const matchingVulnerabilities = (
+    data.vulnerabilities || []
+  ).filter((item: any) => {
+    const configurations = item.cve?.configurations || [];
 
-      return configurations.some((configuration: any) =>
-      hasMatchingCPE(configuration, version)
+    return configurations.some((configuration: any) =>
+      hasMatchingCPE(
+        configuration,
+        version,
+        normalizedPackageName
+      )
     );
-    }
-  );
+  });
 
   console.log(
     `NVD returned ${matchingVulnerabilities.length} version-matched finding(s) for ${packageName}@${version}.`
   );
 
+  // Extract relevant vulnerability information.
   return matchingVulnerabilities.map((item: any) => {
     const cve = item.cve;
 
@@ -205,9 +277,13 @@ export async function searchNVD(
   });
 }
 
+// Test the NVD API connection.
 export async function testNVDConnection(): Promise<boolean> {
   try {
-    const results = await searchNVD("log4j-core", "2.14.1");
+    const results = await searchNVD(
+      "log4j-core",
+      "2.14.1"
+    );
 
     console.log(
       `NVD returned ${results.length} version-matched vulnerability result(s).`
@@ -220,22 +296,31 @@ export async function testNVDConnection(): Promise<boolean> {
   }
 }
 
-
-
+// Recursively evaluate NVD configuration nodes.
 function evaluateNode(
   node: any,
-  installedVersion: string
+  installedVersion: string,
+  packageName: string
 ): boolean {
-  const operator = String(node.operator || "OR").toUpperCase();
+  const operator = String(
+    node.operator || "OR"
+  ).toUpperCase();
 
   const cpeMatches = node.cpeMatch || [];
 
+  // Evaluate nested child nodes recursively.
   const childResults = (node.children || []).map(
-    (child: any) => evaluateNode(child, installedVersion)
+    (child: any) =>
+      evaluateNode(child, installedVersion, packageName)
   );
 
+  // Evaluate individual CPE matches.
   const matchResults = cpeMatches.map((match: any) =>
-    matchesAffectedVersion(match, installedVersion)
+    matchesAffectedVersion(
+      match,
+      installedVersion,
+      packageName
+    )
   );
 
   const results = [...matchResults, ...childResults];
@@ -259,5 +344,3 @@ function evaluateNode(
 
   return result;
 }
-
-
