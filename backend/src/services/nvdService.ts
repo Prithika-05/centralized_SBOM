@@ -25,8 +25,37 @@ export function compareVersions(a: string, b: string): number {
     const y = right[i];
 
     if (x === undefined && y === undefined) return 0;
-    if (x === undefined) return typeof y === "string" ? 1 : -1;
-    if (y === undefined) return typeof x === "string" ? -1 : 1;
+    if (x === undefined) {
+    const remaining = right.slice(i);
+
+    if (
+      remaining.every(
+        (part) =>
+          typeof part === "string" &&
+          ["final", "ga", "release"].includes(part)
+      )
+    ) {
+      return 0;
+    }
+
+    return typeof y === "string" ? 1 : -1;
+  }
+
+  if (y === undefined) {
+    const remaining = left.slice(i);
+
+    if (
+      remaining.every(
+        (part) =>
+          typeof part === "string" &&
+          ["final", "ga", "release"].includes(part)
+      )
+    ) {
+      return 0;
+    }
+
+    return typeof x === "string" ? -1 : 1;
+  }
 
     if (x === y) continue;
 

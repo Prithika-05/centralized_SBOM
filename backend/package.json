@@ -16,7 +16,10 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "maven": "^5.0.0",
+    "maven-deploy": "^1.5.0",
     "multer": "^2.3.0",
+    "mvn-artifact-filename": "^6.1.2",
     "neo4j-driver": "^6.2.0"
   },
   "devDependencies": {
