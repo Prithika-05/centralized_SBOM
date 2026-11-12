@@ -1,4 +1,4 @@
-import { searchNVD } from "./src/services/nvdService";
+import { searchNVD } from "../src/services/nvdService";
 
 async function test() {
   const results = await searchNVD(

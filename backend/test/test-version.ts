@@ -1,4 +1,4 @@
-import { compareVersions } from "./src/services/nvdService";
+import { compareVersions } from "../src/services/nvdService";
 
 const testCases = [
   {

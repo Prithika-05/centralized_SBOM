@@ -158,6 +158,39 @@ function App() {
             {vulnerability.cvssScore !== undefined && (
               <p>CVSS score: {vulnerability.cvssScore}</p>
             )}
+            {source === "nvd" && vulnerability.matchedCPE && (
+              <div className="cpe-evidence">
+                <strong>CPE Matching Evidence</strong>
+
+                <p>
+                  Matched CPE: {vulnerability.matchedCPE}
+                </p>
+
+                {vulnerability.matchedVersionRange && (
+                  <div>
+                    <p>
+                      Start including:{" "}
+                      {vulnerability.matchedVersionRange.startIncluding ?? "Not specified"}
+                    </p>
+
+                    <p>
+                      Start excluding:{" "}
+                      {vulnerability.matchedVersionRange.startExcluding ?? "Not specified"}
+                    </p>
+
+                    <p>
+                      End including:{" "}
+                      {vulnerability.matchedVersionRange.endIncluding ?? "Not specified"}
+                    </p>
+
+                    <p>
+                      End excluding:{" "}
+                      {vulnerability.matchedVersionRange.endExcluding ?? "Not specified"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </article>
         ))}
       </div>

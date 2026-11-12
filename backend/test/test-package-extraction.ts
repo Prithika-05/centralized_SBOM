@@ -2,7 +2,7 @@
 import {
   detectEcosystem,
   extractOSVPackageName,
-} from "./src/services/vulnerabilityCorrelationService";
+} from "../src/services/vulnerabilityCorrelationService";
 
 const testCases = [
   {

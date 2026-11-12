@@ -8,6 +8,28 @@ export interface NVDVulnerability {
   description: string;
   severity?: string;
   cvssScore?: number;
+  matchedCPE?: string;
+  matchedVersionRange?: {
+    startIncluding?: string;
+    startExcluding?: string;
+    endIncluding?: string;
+    endExcluding?: string;
+  };
+}
+
+interface CPEMatchEvidence {
+  matchedCPE: string;
+  matchedVersionRange?: {
+    startIncluding?: string;
+    startExcluding?: string;
+    endIncluding?: string;
+    endExcluding?: string;
+  };
+}
+
+interface CPEEvaluationResult {
+  matched: boolean;
+  evidence: CPEMatchEvidence[];
 }
 
 // Compare common software version formats, including versions with qualifiers.
@@ -76,31 +98,50 @@ export function compareVersions(a: string, b: string): number {
 // Map supported package names to their corresponding CPE identities.
 const CPE_IDENTITIES: Record<
   string,
-  { vendor: string; products: string[] }
+  {
+    vendor: string;
+    products: string[];
+    searchKeyword: string;
+  }
 > = {
   "maven:log4j-core": {
     vendor: "apache",
     products: ["log4j-core", "log4j"],
+    searchKeyword: "log4j",
   },
   "maven:log4j": {
     vendor: "apache",
     products: ["log4j"],
+    searchKeyword: "log4j",
+  },
+  "maven:tomcat-catalina": {
+    vendor: "apache",
+    products: ["tomcat"],
+    searchKeyword: "tomcat",
   },
 };
-
 // Check whether an installed package version falls within
 // the affected version range specified by an NVD CPE match.
+
 function matchesAffectedVersion(
   cpeMatch: any,
   installedVersion: string,
   packageName: string,
   ecosystem: string
-): boolean {
-  if (cpeMatch.vulnerable !== true) return false;
+): {
+  matchedCPE: string;
+  matchedVersionRange?: {
+    startIncluding?: string;
+    startExcluding?: string;
+    endIncluding?: string;
+    endExcluding?: string;
+  };
+} | null {
+  if (cpeMatch.vulnerable !== true) return null;
 
   const criteria = cpeMatch.criteria || cpeMatch.cpe23Uri;
 
-  if (typeof criteria !== "string") return false;
+  if (typeof criteria !== "string") return null;
 
   const parts = criteria.split(":");
 
@@ -114,13 +155,13 @@ function matchesAffectedVersion(
 
   const identity = CPE_IDENTITIES[identityKey];
 
-  if (!identity) return false;
+  if (!identity) return null;
 
   // Match the expected vendor and product.
-  if (vendor !== identity.vendor) return false;
+  if (vendor !== identity.vendor) return null;
 
   if (!product || !identity.products.includes(product)) {
-    return false;
+    return null;
   }
 
   const hasRange =
@@ -129,17 +170,27 @@ function matchesAffectedVersion(
     cpeMatch.versionEndIncluding !== undefined ||
     cpeMatch.versionEndExcluding !== undefined;
 
-  // If there is no version range, check the CPE version.
+  // Handle exact CPE versions and wildcard versions.
   if (!hasRange) {
     if (cpeVersion === "*") {
-      return true;
+      return {
+        matchedCPE: criteria,
+        matchedVersionRange: {},
+      };
     }
 
     if (!cpeVersion || cpeVersion === "-") {
-      return false;
+      return null;
     }
 
-    return compareVersions(installedVersion, cpeVersion) === 0;
+    if (compareVersions(installedVersion, cpeVersion) !== 0) {
+      return null;
+    }
+
+    return {
+      matchedCPE: criteria,
+      matchedVersionRange: {},
+    };
   }
 
   // Check the lower version boundary.
@@ -150,7 +201,7 @@ function matchesAffectedVersion(
       cpeMatch.versionStartIncluding
     ) < 0
   ) {
-    return false;
+    return null;
   }
 
   if (
@@ -160,7 +211,7 @@ function matchesAffectedVersion(
       cpeMatch.versionStartExcluding
     ) <= 0
   ) {
-    return false;
+    return null;
   }
 
   // Check the upper version boundary.
@@ -171,7 +222,7 @@ function matchesAffectedVersion(
       cpeMatch.versionEndIncluding
     ) > 0
   ) {
-    return false;
+    return null;
   }
 
   if (
@@ -181,26 +232,33 @@ function matchesAffectedVersion(
       cpeMatch.versionEndExcluding
     ) >= 0
   ) {
-    return false;
+    return null;
   }
 
-  return true;
+  return {
+    matchedCPE: criteria,
+    matchedVersionRange: {
+      startIncluding: cpeMatch.versionStartIncluding,
+      startExcluding: cpeMatch.versionStartExcluding,
+      endIncluding: cpeMatch.versionEndIncluding,
+      endExcluding: cpeMatch.versionEndExcluding,
+    },
+  };
 }
 
-// Recursively inspect NVD configuration nodes and their CPE matches.
 function hasMatchingCPE(
   configuration: any,
   installedVersion: string,
   packageName: string,
   ecosystem: string
-): boolean {
+): CPEEvaluationResult {
   const nodes = configuration.nodes || [];
 
   if (nodes.length === 0) {
-    return false;
+    return { matched: false, evidence: [] };
   }
 
-  const results = nodes.map((node: any) =>
+  const results: CPEEvaluationResult[] = nodes.map((node: any) =>
     evaluateNode(
       node,
       installedVersion,
@@ -213,23 +271,34 @@ function hasMatchingCPE(
     configuration.operator || "OR"
   ).toUpperCase();
 
-  let result: boolean;
+  let matched: boolean;
 
   if (operator === "AND") {
-    result = results.every(Boolean);
+    matched = results.every((result) => result.matched);
   } else {
-    result = results.some(Boolean);
+    matched = results.some((result) => result.matched);
   }
 
   if (configuration.negate === true) {
-    result = !result;
+    matched = !matched;
+
+    return {
+      matched,
+      evidence: [],
+    };
   }
 
-  return result;
+  return {
+    matched,
+    evidence: matched
+      ? results
+          .filter((result) => result.matched)
+          .flatMap((result) => result.evidence)
+      : [],
+  };
 }
 
-// Search the NVD database for vulnerabilities affecting
-// the specified package, version and ecosystem.
+
 export async function searchNVD(
   packageName: string,
   version: string,
@@ -245,14 +314,14 @@ export async function searchNVD(
 
   // Build the ecosystem-aware package identity.
   const identityKey =
-    `${normalizedEcosystem}:${normalizedPackageName}`;
+  `${ecosystem.toLowerCase().trim()}:${normalizedPackageName}`;
 
-  // Skip packages without a registered CPE mapping.
-  if (!CPE_IDENTITIES[identityKey]) {
+  const identity = CPE_IDENTITIES[identityKey];
+
+  if (!identity) {
     console.log(
       `Skipping NVD search: no verified CPE mapping for ${ecosystem}:${packageName}`
     );
-
     return [];
   }
 
@@ -263,7 +332,10 @@ export async function searchNVD(
   const apiKey = process.env.NVD_API_KEY;
 
   // Broad discovery search; applicability is checked using CPE data.
-  url.searchParams.set("keywordSearch", "log4j");
+  url.searchParams.set(
+    "keywordSearch",
+    identity.searchKeyword
+  );
 
   console.log("NVD request URL:", url.toString());
 
@@ -281,27 +353,40 @@ export async function searchNVD(
 
   // Filter vulnerabilities using package identity and version matching.
   const matchingVulnerabilities = (
-    data.vulnerabilities || []
-  ).filter((item: any) => {
+  data.vulnerabilities || []
+)
+  .map((item: any) => {
     const configurations = item.cve?.configurations || [];
 
-    return configurations.some((configuration: any) =>
-      hasMatchingCPE(
-        configuration,
-        version,
-        normalizedPackageName,
-        normalizedEcosystem
+    const evidence = configurations
+      .map((configuration: any) =>
+        hasMatchingCPE(
+          configuration,
+          version,
+          normalizedPackageName,
+          normalizedEcosystem
+        )
       )
-    );
-  });
+      .filter((result: CPEEvaluationResult) => result.matched)
+      .flatMap((result: CPEEvaluationResult) => result.evidence);
+
+    return {
+      item,
+      evidence,
+    };
+  })
+  .filter(
+    (result: any) => result.evidence.length > 0
+  );
 
   console.log(
     `NVD returned ${matchingVulnerabilities.length} version-matched finding(s) for ${packageName}@${version}.`
   );
 
   // Extract relevant vulnerability information.
-  return matchingVulnerabilities.map((item: any) => {
-    const cve = item.cve;
+  return matchingVulnerabilities.map((result: any) => {
+  const cve = result.item.cve;
+  const matchedEvidence = result.evidence[0];
 
     const description =
       cve.descriptions?.find(
@@ -312,12 +397,14 @@ export async function searchNVD(
       cve.metrics?.cvssMetricV31?.[0]?.cvssData ||
       cve.metrics?.cvssMetricV30?.[0]?.cvssData ||
       cve.metrics?.cvssMetricV2?.[0]?.cvssData;
-
+    
     return {
       id: cve.id,
       description,
       severity: cvss?.baseSeverity,
       cvssScore: cvss?.baseScore,
+      matchedCPE: matchedEvidence?.matchedCPE,
+      matchedVersionRange: matchedEvidence?.matchedVersionRange,
     };
   });
 }
@@ -350,25 +437,22 @@ function evaluateNode(
   installedVersion: string,
   packageName: string,
   ecosystem: string
-): boolean {
-  const operator = String(
-    node.operator || "OR"
-  ).toUpperCase();
+): CPEEvaluationResult {
+  const operator = String(node.operator || "OR").toUpperCase();
 
   const cpeMatches = node.cpeMatch || [];
 
-  // Evaluate nested child nodes recursively.
-  const childResults = (node.children || []).map(
-    (child: any) =>
-      evaluateNode(
-        child,
-        installedVersion,
-        packageName,
-        ecosystem
-      )
+  const childResults: CPEEvaluationResult[] = (
+    node.children || []
+  ).map((child: any) =>
+    evaluateNode(
+      child,
+      installedVersion,
+      packageName,
+      ecosystem
+    )
   );
 
-  // Evaluate individual CPE matches.
   const matchResults = cpeMatches.map((match: any) =>
     matchesAffectedVersion(
       match,
@@ -378,24 +462,41 @@ function evaluateNode(
     )
   );
 
-  const results = [...matchResults, ...childResults];
+  const results: CPEEvaluationResult[] = [
+    ...matchResults.map((evidence: CPEMatchEvidence | null) => ({
+      matched: evidence !== null,
+      evidence: evidence ? [evidence] : [],
+    })),
+    ...childResults,
+  ];
 
   if (results.length === 0) {
-    return false;
+    return { matched: false, evidence: [] };
   }
 
-  let result: boolean;
+  let matched: boolean;
 
   if (operator === "AND") {
-    result = results.every(Boolean);
+    matched = results.every((result) => result.matched);
   } else {
-    result = results.some(Boolean);
+    matched = results.some((result) => result.matched);
   }
 
-  // Apply NVD's explicit negation condition.
   if (node.negate === true) {
-    result = !result;
+    matched = !matched;
+
+    return {
+      matched,
+      evidence: [],
+    };
   }
 
-  return result;
+  return {
+    matched,
+    evidence: matched
+      ? results
+          .filter((result) => result.matched)
+          .flatMap((result) => result.evidence)
+      : [],
+  };
 }
