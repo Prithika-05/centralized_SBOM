@@ -1,6 +1,6 @@
-
 export interface OSVVulnerability {
   id: string;
+  aliases: string[];
   summary: string;
   severity?: string;
   cvssScore?: number;
@@ -13,6 +13,7 @@ interface OSVSeverity {
 
 interface OSVVulnerabilityResponse {
   id: string;
+  aliases?: string[];
   summary?: string;
   database_specific?: {
     severity?: string;
@@ -67,6 +68,7 @@ export async function searchOSV(
 
     return {
       id: vulnerability.id,
+      aliases: vulnerability.aliases || [],
       summary: vulnerability.summary || "",
       severity:
         typeof databaseSeverity === "string"

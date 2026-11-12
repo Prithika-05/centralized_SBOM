@@ -16,7 +16,10 @@ import { testOSVConnection } from "./services/osvService.js";
 import {
   findAllVulnerabilities,
 } from "./services/combinedVulnerabilityService.js";
-import { correlateComponent } from "./services/vulnerabilityCorrelationService.js";
+import {
+  correlateComponent,
+  buildUnifiedVulnerabilities,
+} from "./services/vulnerabilityCorrelationService.js";
 import { findImpactedComponents } from "./services/impactAnalysisService.js";
 import { validateCRA } from "./services/craValidationService.js";
 import { analyzeComponent } from "./services/analysisService.js";
@@ -255,7 +258,14 @@ app.get("/api/components/:componentId/vulnerability-analysis", async (req, res) 
       version
     );
 
-    res.json(result);
+    const unifiedVulnerabilities = buildUnifiedVulnerabilities(
+      result.vulnerabilities
+    );
+
+    res.json({
+      ...result,
+      unifiedVulnerabilities,
+    });
   } catch (error) {
     console.error("Failed to correlate vulnerabilities:", error);
 

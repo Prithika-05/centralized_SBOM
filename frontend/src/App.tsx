@@ -436,7 +436,39 @@ function App() {
                         {getAnalysisSection("vulnerabilityAnalysis")
                           ?.vulnerabilities?.osv?.length ?? 0}
                       </p>
-                      
+                      <h4>Unified Vulnerability Findings</h4>
+
+                      <p>
+                        Unique vulnerabilities:{" "}
+                        {getAnalysisSection("vulnerabilityAnalysis")
+                          ?.unifiedVulnerabilities?.length ?? 0}
+                      </p>
+
+                      {getAnalysisSection("vulnerabilityAnalysis")
+                        ?.unifiedVulnerabilities?.map((vulnerability: any) => (
+                          <div key={vulnerability.id} className="vulnerability-item">
+                            <h5>{vulnerability.id}</h5>
+
+                            <p>Severity: {vulnerability.severity}</p>
+
+                            <p>
+                              Sources: {vulnerability.sources?.join(", ")}
+                            </p>
+
+                            <p>{vulnerability.description}</p>
+
+                            {vulnerability.cvssScore !== undefined && (
+                              <p>CVSS Score: {vulnerability.cvssScore}</p>
+                            )}
+
+                            {vulnerability.matchedCPE && (
+                              <div className="cpe-evidence">
+                                <strong>CPE Matching Evidence</strong>
+                                <p>Matched CPE: {vulnerability.matchedCPE}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       <h4>NVD Findings</h4>
                       {renderVulnerabilityList("nvd")}
 

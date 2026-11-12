@@ -1,4 +1,7 @@
-import { correlateComponent } from "./vulnerabilityCorrelationService.js";
+import {
+  correlateComponent,
+  buildUnifiedVulnerabilities,
+} from "./vulnerabilityCorrelationService.js";
 import {
   findImpactedComponents,
   hasDependencyRelationships,
@@ -16,7 +19,9 @@ export async function analyzeComponent(
     name,
     version
   );
-
+  const unifiedVulnerabilities = buildUnifiedVulnerabilities(
+    vulnerabilityAnalysis.vulnerabilities
+  );
   const impactedComponents = await findImpactedComponents(componentId);
 
   const hasDependencies =
@@ -27,9 +32,7 @@ export async function analyzeComponent(
   const vulnerabilityAnalysisCompleted = !!vulnerabilityAnalysis;
   const hasSBOM = await hasValidatedSBOM(componentId);
 
-  const vulnerabilityCount =
-    ((vulnerabilityAnalysis as any)?.vulnerabilities?.nvd?.length ?? 0) +
-    ((vulnerabilityAnalysis as any)?.vulnerabilities?.osv?.length ?? 0);
+  const vulnerabilityCount = unifiedVulnerabilities.length;
 
   const craValidation = validateCRA(
     hasSBOM,                           // hasSBOM
@@ -45,7 +48,10 @@ export async function analyzeComponent(
       name,
       version,
     },
-    vulnerabilityAnalysis,
+    vulnerabilityAnalysis: {
+      ...vulnerabilityAnalysis,
+      unifiedVulnerabilities,
+    },
     impactAnalysis: {
       impactedComponents,
     },
