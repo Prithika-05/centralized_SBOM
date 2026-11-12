@@ -19,6 +19,9 @@ function App() {
   const [analysisResult, setAnalysisResult] = useState<unknown>(null);
   const [analysisMessage, setAnalysisMessage] = useState("");
   const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportMessage, setReportMessage] = useState("");
+  const [reportResult, setReportResult] = useState<unknown>(null);
 
   async function handleUpload() {
     if (!file) {
@@ -102,6 +105,61 @@ function App() {
     }
   }
 
+  async function handleGenerateReport() {
+    if (!componentId.trim() || !packageName.trim() || !packageVersion.trim()) {
+      setReportMessage("Please enter all component details.");
+      return;
+    }
+
+    setReportLoading(true);
+    setReportMessage("");
+
+    try {
+      const params = new URLSearchParams({
+        name: packageName.trim(),
+        version: packageVersion.trim(),
+      });
+
+      const response = await fetch(
+        `http://localhost:5000/api/components/${encodeURIComponent(
+          componentId.trim()
+        )}/report?${params.toString()}`
+      );
+
+      const data: unknown = await response.json();
+
+      if (!response.ok) {
+        setReportMessage("Report generation failed.");
+        setReportResult(data);
+        return;
+      }
+
+      setReportResult(data);
+
+      const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+      );
+
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = downloadUrl;
+      link.download = `${packageName.trim()}-${packageVersion.trim()}-security-report.json`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(downloadUrl);
+
+      setReportMessage("Security report generated and downloaded successfully.");
+    } catch {
+      setReportMessage("Could not connect to the backend.");
+    } finally {
+      setReportLoading(false);
+    }
+  }
   
   function getAnalysisSection(key: string): Record<string, any> | null {
     if (
@@ -407,6 +465,29 @@ function App() {
                 </span>
               )}
             </Button>
+
+            <Button
+              onClick={handleGenerateReport}
+              disabled={reportLoading || analysisLoading}
+              className="w-full bg-green-600 hover:bg-green-500 text-black font-bold h-9 text-sm uppercase tracking-wider"
+            >
+              {reportLoading ? "Generating Report..." : "Generate Security Report"}
+            </Button>
+
+            {reportMessage && (
+              <p className="text-xs text-green-400 font-mono">
+                {reportMessage}
+              </p>
+            )}
+
+            {reportResult !== null && (
+              <details className="dashboard-card">
+                <summary>View Generated Security Report</summary>
+                <pre className="result">
+                  {JSON.stringify(reportResult, null, 2)}
+                </pre>
+              </details>
+            )}
 
             {analysisMessage && (
               <Alert className="mt-2 bg-cyan-950/20 border-cyan-500/30 text-cyan-400 backdrop-blur-sm py-3">
