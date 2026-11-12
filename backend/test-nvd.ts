@@ -1,7 +1,11 @@
 import { searchNVD } from "./src/services/nvdService";
 
 async function test() {
-  const results = await searchNVD("log4j-core", "2.14.1");
+  const results = await searchNVD(
+    "log4j-core",
+    "2.14.1",
+    "Maven"
+  );
 
   console.log("\nTotal NVD findings:", results.length);
 

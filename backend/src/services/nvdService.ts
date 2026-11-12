@@ -25,37 +25,38 @@ export function compareVersions(a: string, b: string): number {
     const y = right[i];
 
     if (x === undefined && y === undefined) return 0;
+
     if (x === undefined) {
-    const remaining = right.slice(i);
+      const remaining = right.slice(i);
 
-    if (
-      remaining.every(
-        (part) =>
-          typeof part === "string" &&
-          ["final", "ga", "release"].includes(part)
-      )
-    ) {
-      return 0;
+      if (
+        remaining.every(
+          (part) =>
+            typeof part === "string" &&
+            ["final", "ga", "release"].includes(part)
+        )
+      ) {
+        return 0;
+      }
+
+      return typeof y === "string" ? 1 : -1;
     }
 
-    return typeof y === "string" ? 1 : -1;
-  }
+    if (y === undefined) {
+      const remaining = left.slice(i);
 
-  if (y === undefined) {
-    const remaining = left.slice(i);
+      if (
+        remaining.every(
+          (part) =>
+            typeof part === "string" &&
+            ["final", "ga", "release"].includes(part)
+        )
+      ) {
+        return 0;
+      }
 
-    if (
-      remaining.every(
-        (part) =>
-          typeof part === "string" &&
-          ["final", "ga", "release"].includes(part)
-      )
-    ) {
-      return 0;
+      return typeof x === "string" ? -1 : 1;
     }
-
-    return typeof x === "string" ? -1 : 1;
-  }
 
     if (x === y) continue;
 
@@ -77,11 +78,11 @@ const CPE_IDENTITIES: Record<
   string,
   { vendor: string; products: string[] }
 > = {
-  "log4j-core": {
+  "maven:log4j-core": {
     vendor: "apache",
     products: ["log4j-core", "log4j"],
   },
-  "log4j": {
+  "maven:log4j": {
     vendor: "apache",
     products: ["log4j"],
   },
@@ -92,7 +93,8 @@ const CPE_IDENTITIES: Record<
 function matchesAffectedVersion(
   cpeMatch: any,
   installedVersion: string,
-  packageName: string
+  packageName: string,
+  ecosystem: string
 ): boolean {
   if (cpeMatch.vulnerable !== true) return false;
 
@@ -107,10 +109,10 @@ function matchesAffectedVersion(
   const product = parts[4]?.toLowerCase();
   const cpeVersion = parts[5];
 
-  // Identify the expected CPE identity for the installed package.
-  const identity = CPE_IDENTITIES[
-    packageName.toLowerCase().trim()
-  ];
+  const identityKey =
+    `${ecosystem.toLowerCase().trim()}:${packageName.toLowerCase().trim()}`;
+
+  const identity = CPE_IDENTITIES[identityKey];
 
   if (!identity) return false;
 
@@ -127,18 +129,19 @@ function matchesAffectedVersion(
     cpeMatch.versionEndIncluding !== undefined ||
     cpeMatch.versionEndExcluding !== undefined;
 
-  // If there is no version range, require an exact CPE version.
+  // If there is no version range, check the CPE version.
   if (!hasRange) {
-  if (cpeVersion === "*") {
-    return true;
+    if (cpeVersion === "*") {
+      return true;
+    }
+
+    if (!cpeVersion || cpeVersion === "-") {
+      return false;
+    }
+
+    return compareVersions(installedVersion, cpeVersion) === 0;
   }
 
-  if (!cpeVersion || cpeVersion === "-") {
-    return false;
-  }
-
-  return compareVersions(installedVersion, cpeVersion) === 0;
-}
   // Check the lower version boundary.
   if (
     cpeMatch.versionStartIncluding &&
@@ -188,7 +191,8 @@ function matchesAffectedVersion(
 function hasMatchingCPE(
   configuration: any,
   installedVersion: string,
-  packageName: string
+  packageName: string,
+  ecosystem: string
 ): boolean {
   const nodes = configuration.nodes || [];
 
@@ -197,7 +201,12 @@ function hasMatchingCPE(
   }
 
   const results = nodes.map((node: any) =>
-    evaluateNode(node, installedVersion, packageName)
+    evaluateNode(
+      node,
+      installedVersion,
+      packageName,
+      ecosystem
+    )
   );
 
   const operator = String(
@@ -220,22 +229,28 @@ function hasMatchingCPE(
 }
 
 // Search the NVD database for vulnerabilities affecting
-// the specified package and installed version.
+// the specified package, version and ecosystem.
 export async function searchNVD(
   packageName: string,
-  version: string
+  version: string,
+  ecosystem: string = ""
 ): Promise<NVDVulnerability[]> {
   const normalizedPackageName = packageName
     .toLowerCase()
     .trim();
 
-  // Only search for supported Log4j packages.
-  if (
-    normalizedPackageName !== "log4j-core" &&
-    normalizedPackageName !== "log4j"
-  ) {
+  const normalizedEcosystem = ecosystem
+    .toLowerCase()
+    .trim();
+
+  // Build the ecosystem-aware package identity.
+  const identityKey =
+    `${normalizedEcosystem}:${normalizedPackageName}`;
+
+  // Skip packages without a registered CPE mapping.
+  if (!CPE_IDENTITIES[identityKey]) {
     console.log(
-      `Skipping NVD Log4j search for unsupported package: ${packageName}`
+      `Skipping NVD search: no verified CPE mapping for ${ecosystem}:${packageName}`
     );
 
     return [];
@@ -274,7 +289,8 @@ export async function searchNVD(
       hasMatchingCPE(
         configuration,
         version,
-        normalizedPackageName
+        normalizedPackageName,
+        normalizedEcosystem
       )
     );
   });
@@ -311,12 +327,15 @@ export async function testNVDConnection(): Promise<boolean> {
   try {
     const results = await searchNVD(
       "log4j-core",
-      "2.14.1"
+      "2.14.1",
+      "Maven"
     );
 
     console.log(
       `NVD returned ${results.length} version-matched vulnerability result(s).`
     );
+
+    console.log("NVD sample results:", results.slice(0, 4));
 
     return true;
   } catch (error) {
@@ -329,7 +348,8 @@ export async function testNVDConnection(): Promise<boolean> {
 function evaluateNode(
   node: any,
   installedVersion: string,
-  packageName: string
+  packageName: string,
+  ecosystem: string
 ): boolean {
   const operator = String(
     node.operator || "OR"
@@ -340,7 +360,12 @@ function evaluateNode(
   // Evaluate nested child nodes recursively.
   const childResults = (node.children || []).map(
     (child: any) =>
-      evaluateNode(child, installedVersion, packageName)
+      evaluateNode(
+        child,
+        installedVersion,
+        packageName,
+        ecosystem
+      )
   );
 
   // Evaluate individual CPE matches.
@@ -348,7 +373,8 @@ function evaluateNode(
     matchesAffectedVersion(
       match,
       installedVersion,
-      packageName
+      packageName,
+      ecosystem
     )
   );
 
