@@ -24,7 +24,8 @@ import { findImpactedComponents } from "./services/impactAnalysisService.js";
 import { validateCRA } from "./services/craValidationService.js";
 import { analyzeComponent } from "./services/analysisService.js";
 import { generateSecurityReport } from "./services/reportService.js";
-
+import { hasValidatedSBOM } from "./services/sbomGraphService.js";
+import { hasDependencyRelationships } from "./services/impactAnalysisService.js";
 
 dotenv.config();
 
@@ -296,33 +297,42 @@ app.get("/api/components/:componentId/impact-analysis", async (req, res) => {
   }
 });
 
+
+
 app.get("/api/components/:componentId/cra-validation", async (req, res) => {
   try {
-    const vulnerabilityCount = Number(req.query.vulnerabilityCount || 0);
-    const hasDependencies = req.query.hasDependencies === "true";
-    const hasImpactAnalysis = req.query.hasImpactAnalysis === "true";
-    
-    // Explicitly determine if analysis was completed (e.g., if we have a count or query flag)
-    const vulnerabilityAnalysisCompleted = req.query.vulnerabilityAnalysisCompleted === "true" || true;
+    const componentId = req.params.componentId;
+    const name = req.query.name as string;
+    const version = req.query.version as string;
 
-    // FIX: Match the exact 5 positions required by validateCRA
-    const result = validateCRA(
-      true,                            // hasSBOM
-      vulnerabilityAnalysisCompleted,  // vulnerabilityAnalysisCompleted
-      vulnerabilityCount,              // vulnerabilityCount
-      hasDependencies,                 // hasDependencies
-      hasImpactAnalysis                // hasImpactAnalysis
+    if (!name || !version) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Package name and version are required",
+      });
+    }
+
+    // Run the actual integrated analysis
+    const analysis = await analyzeComponent(
+      componentId,
+      name,
+      version
     );
 
     res.json({
-      componentId: req.params.componentId,
-      ...result,
+      componentId,
+      ...analysis.craValidation,
     });
   } catch (error) {
     console.error("CRA validation failed:", error);
-    res.status(500).json({ status: "ERROR", message: "CRA validation failed" });
+
+    res.status(500).json({
+      status: "ERROR",
+      message: "CRA validation failed",
+    });
   }
 });
+
 
 
 app.get("/api/components/:componentId/analysis", async (req, res) => {

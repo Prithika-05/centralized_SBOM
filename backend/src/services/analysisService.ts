@@ -26,9 +26,7 @@ export async function analyzeComponent(
 
   const hasDependencies =
   await hasDependencyRelationships(componentId);
-  const hasImpactAnalysis =
-    Array.isArray(impactedComponents) &&
-    impactedComponents.length > 0;  
+  const hasImpactAnalysis = Array.isArray(impactedComponents);
   const vulnerabilityAnalysisCompleted = !!vulnerabilityAnalysis;
   const hasSBOM = await hasValidatedSBOM(componentId);
 
