@@ -27,8 +27,13 @@ interface CPEMatchEvidence {
   };
 }
 
+type CPEMatchStatus =
+  | "MATCH"
+  | "NO_MATCH"
+  | "INDETERMINATE";
+
 interface CPEEvaluationResult {
-  matched: boolean;
+  status: CPEMatchStatus;
   evidence: CPEMatchEvidence[];
 }
 
@@ -246,7 +251,7 @@ function matchesAffectedVersion(
   };
 }
 
-function hasMatchingCPE(
+export function hasMatchingCPE(
   configuration: any,
   installedVersion: string,
   packageName: string,
@@ -255,49 +260,52 @@ function hasMatchingCPE(
   const nodes = configuration.nodes || [];
 
   if (nodes.length === 0) {
-    return { matched: false, evidence: [] };
+    return { status: "INDETERMINATE", evidence: [] };
   }
 
   const results: CPEEvaluationResult[] = nodes.map((node: any) =>
-    evaluateNode(
-      node,
-      installedVersion,
-      packageName,
-      ecosystem
-    )
+    evaluateNode(node, installedVersion, packageName, ecosystem)
   );
 
-  const operator = String(
-    configuration.operator || "OR"
-  ).toUpperCase();
+  const operator = String(configuration.operator || "OR").toUpperCase();
 
-  let matched: boolean;
+  let status: CPEMatchStatus;
 
   if (operator === "AND") {
-    matched = results.every((result) => result.matched);
+    if (results.some((result) => result.status === "NO_MATCH")) {
+      status = "NO_MATCH";
+    } else if (results.every((result) => result.status === "MATCH")) {
+      status = "MATCH";
+    } else {
+      status = "INDETERMINATE";
+    }
   } else {
-    matched = results.some((result) => result.matched);
+    if (results.some((result) => result.status === "MATCH")) {
+      status = "MATCH";
+    } else if (results.every((result) => result.status === "NO_MATCH")) {
+      status = "NO_MATCH";
+    } else {
+      status = "INDETERMINATE";
+    }
   }
 
   if (configuration.negate === true) {
-    matched = !matched;
+    if (status === "MATCH") status = "NO_MATCH";
+    else if (status === "NO_MATCH") status = "MATCH";
 
-    return {
-      matched,
-      evidence: [],
-    };
+    return { status, evidence: [] };
   }
 
   return {
-    matched,
-    evidence: matched
-      ? results
-          .filter((result) => result.matched)
-          .flatMap((result) => result.evidence)
-      : [],
+    status,
+    evidence:
+      status === "MATCH"
+        ? results
+            .filter((result) => result.status === "MATCH")
+            .flatMap((result) => result.evidence)
+        : [],
   };
 }
-
 
 export async function searchNVD(
   packageName: string,
@@ -367,7 +375,9 @@ export async function searchNVD(
           normalizedEcosystem
         )
       )
-      .filter((result: CPEEvaluationResult) => result.matched)
+      .filter(
+        (result: CPEEvaluationResult) => result.status === "MATCH"
+      )
       .flatMap((result: CPEEvaluationResult) => result.evidence);
 
     return {
@@ -445,58 +455,64 @@ function evaluateNode(
   const childResults: CPEEvaluationResult[] = (
     node.children || []
   ).map((child: any) =>
-    evaluateNode(
-      child,
-      installedVersion,
-      packageName,
-      ecosystem
-    )
+    evaluateNode(child, installedVersion, packageName, ecosystem)
   );
 
-  const matchResults = cpeMatches.map((match: any) =>
-    matchesAffectedVersion(
-      match,
-      installedVersion,
-      packageName,
-      ecosystem
-    )
+  const matchResults: CPEEvaluationResult[] = cpeMatches.map(
+    (match: any) => {
+      const evidence = matchesAffectedVersion(
+        match,
+        installedVersion,
+        packageName,
+        ecosystem
+      );
+
+      return evidence
+        ? { status: "MATCH", evidence: [evidence] }
+        : { status: "INDETERMINATE", evidence: [] };
+    }
   );
 
-  const results: CPEEvaluationResult[] = [
-    ...matchResults.map((evidence: CPEMatchEvidence | null) => ({
-      matched: evidence !== null,
-      evidence: evidence ? [evidence] : [],
-    })),
-    ...childResults,
-  ];
+  const results = [...matchResults, ...childResults];
 
   if (results.length === 0) {
-    return { matched: false, evidence: [] };
+    return { status: "INDETERMINATE", evidence: [] };
   }
 
-  let matched: boolean;
+  let status: CPEMatchStatus;
 
   if (operator === "AND") {
-    matched = results.every((result) => result.matched);
+    if (results.some((result) => result.status === "NO_MATCH")) {
+      status = "NO_MATCH";
+    } else if (results.every((result) => result.status === "MATCH")) {
+      status = "MATCH";
+    } else {
+      status = "INDETERMINATE";
+    }
   } else {
-    matched = results.some((result) => result.matched);
+    if (results.some((result) => result.status === "MATCH")) {
+      status = "MATCH";
+    } else if (results.every((result) => result.status === "NO_MATCH")) {
+      status = "NO_MATCH";
+    } else {
+      status = "INDETERMINATE";
+    }
   }
 
   if (node.negate === true) {
-    matched = !matched;
+    if (status === "MATCH") status = "NO_MATCH";
+    else if (status === "NO_MATCH") status = "MATCH";
 
-    return {
-      matched,
-      evidence: [],
-    };
+    return { status, evidence: [] };
   }
 
   return {
-    matched,
-    evidence: matched
-      ? results
-          .filter((result) => result.matched)
-          .flatMap((result) => result.evidence)
-      : [],
+    status,
+    evidence:
+      status === "MATCH"
+        ? results
+            .filter((result) => result.status === "MATCH")
+            .flatMap((result) => result.evidence)
+        : [],
   };
 }
