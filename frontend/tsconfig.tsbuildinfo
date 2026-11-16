@@ -1,0 +1,1 @@
+{"root":["./server.ts","./vite.config.ts","./components/ui/alert.tsx","./components/ui/badge.tsx","./components/ui/button.tsx","./components/ui/card.tsx","./components/ui/input.tsx","./lib/utils.ts","./src/app.tsx","./src/gitcommands.ts","./src/main.tsx","./src/components/filestager.tsx","./src/pages/sbomdashboard.tsx","./src/utils/severity.ts"],"version":"6.0.3"}

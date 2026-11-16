@@ -133,24 +133,21 @@ function matchesAffectedVersion(
   installedVersion: string,
   packageName: string,
   ecosystem: string
-): {
-  matchedCPE: string;
-  matchedVersionRange?: {
-    startIncluding?: string;
-    startExcluding?: string;
-    endIncluding?: string;
-    endExcluding?: string;
-  };
-} | null {
-  if (cpeMatch.vulnerable !== true) return null;
+): CPEEvaluationResult {
+  // Environmental requirements cannot be verified by
+  // analysing only one installed component.
+  if (cpeMatch.vulnerable !== true) {
+    return { status: "INDETERMINATE", evidence: [] };
+  }
 
   const criteria = cpeMatch.criteria || cpeMatch.cpe23Uri;
 
-  if (typeof criteria !== "string") return null;
+  if (typeof criteria !== "string") {
+    return { status: "INDETERMINATE", evidence: [] };
+  }
 
   const parts = criteria.split(":");
 
-  // CPE format: cpe:2.3:type:vendor:product:version:...
   const vendor = parts[3]?.toLowerCase();
   const product = parts[4]?.toLowerCase();
   const cpeVersion = parts[5];
@@ -160,13 +157,18 @@ function matchesAffectedVersion(
 
   const identity = CPE_IDENTITIES[identityKey];
 
-  if (!identity) return null;
+  if (!identity) {
+    return { status: "INDETERMINATE", evidence: [] };
+  }
 
-  // Match the expected vendor and product.
-  if (vendor !== identity.vendor) return null;
-
-  if (!product || !identity.products.includes(product)) {
-    return null;
+  // A different vulnerable product is not a match for
+  // the component currently being analysed.
+  if (
+    vendor !== identity.vendor ||
+    !product ||
+    !identity.products.includes(product)
+  ) {
+    return { status: "NO_MATCH", evidence: [] };
   }
 
   const hasRange =
@@ -175,81 +177,78 @@ function matchesAffectedVersion(
     cpeMatch.versionEndIncluding !== undefined ||
     cpeMatch.versionEndExcluding !== undefined;
 
-  // Handle exact CPE versions and wildcard versions.
   if (!hasRange) {
     if (cpeVersion === "*") {
       return {
-        matchedCPE: criteria,
-        matchedVersionRange: {},
+        status: "MATCH",
+        evidence: [{
+          matchedCPE: criteria,
+          matchedVersionRange: {},
+        }],
       };
     }
 
     if (!cpeVersion || cpeVersion === "-") {
-      return null;
+      return { status: "INDETERMINATE", evidence: [] };
     }
 
     if (compareVersions(installedVersion, cpeVersion) !== 0) {
-      return null;
+      return { status: "NO_MATCH", evidence: [] };
     }
 
     return {
-      matchedCPE: criteria,
-      matchedVersionRange: {},
+      status: "MATCH",
+      evidence: [{
+        matchedCPE: criteria,
+        matchedVersionRange: {},
+      }],
     };
   }
 
-  // Check the lower version boundary.
+  // Lower version boundaries.
   if (
     cpeMatch.versionStartIncluding &&
-    compareVersions(
-      installedVersion,
-      cpeMatch.versionStartIncluding
-    ) < 0
+    compareVersions(installedVersion, cpeMatch.versionStartIncluding) < 0
   ) {
-    return null;
+    return { status: "NO_MATCH", evidence: [] };
   }
 
   if (
     cpeMatch.versionStartExcluding &&
-    compareVersions(
-      installedVersion,
-      cpeMatch.versionStartExcluding
-    ) <= 0
+    compareVersions(installedVersion, cpeMatch.versionStartExcluding) <= 0
   ) {
-    return null;
+    return { status: "NO_MATCH", evidence: [] };
   }
 
-  // Check the upper version boundary.
+  // Upper version boundaries.
   if (
     cpeMatch.versionEndIncluding &&
-    compareVersions(
-      installedVersion,
-      cpeMatch.versionEndIncluding
-    ) > 0
+    compareVersions(installedVersion, cpeMatch.versionEndIncluding) > 0
   ) {
-    return null;
+    return { status: "NO_MATCH", evidence: [] };
   }
 
   if (
     cpeMatch.versionEndExcluding &&
-    compareVersions(
-      installedVersion,
-      cpeMatch.versionEndExcluding
-    ) >= 0
+    compareVersions(installedVersion, cpeMatch.versionEndExcluding) >= 0
   ) {
-    return null;
+    return { status: "NO_MATCH", evidence: [] };
   }
 
   return {
-    matchedCPE: criteria,
-    matchedVersionRange: {
-      startIncluding: cpeMatch.versionStartIncluding,
-      startExcluding: cpeMatch.versionStartExcluding,
-      endIncluding: cpeMatch.versionEndIncluding,
-      endExcluding: cpeMatch.versionEndExcluding,
-    },
+    status: "MATCH",
+    evidence: [{
+      matchedCPE: criteria,
+      matchedVersionRange: {
+        startIncluding: cpeMatch.versionStartIncluding,
+        startExcluding: cpeMatch.versionStartExcluding,
+        endIncluding: cpeMatch.versionEndIncluding,
+        endExcluding: cpeMatch.versionEndExcluding,
+      },
+    }],
   };
 }
+
 
 export function hasMatchingCPE(
   configuration: any,
@@ -459,18 +458,13 @@ function evaluateNode(
   );
 
   const matchResults: CPEEvaluationResult[] = cpeMatches.map(
-    (match: any) => {
-      const evidence = matchesAffectedVersion(
+    (match: any) =>
+      matchesAffectedVersion(
         match,
         installedVersion,
         packageName,
         ecosystem
-      );
-
-      return evidence
-        ? { status: "MATCH", evidence: [evidence] }
-        : { status: "INDETERMINATE", evidence: [] };
-    }
+      )
   );
 
   const results = [...matchResults, ...childResults];

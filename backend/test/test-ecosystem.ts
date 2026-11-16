@@ -1,4 +1,4 @@
-import { detectEcosystem } from "./src/services/vulnerabilityCorrelationService";
+import { detectEcosystem } from "../src/services/vulnerabilityCorrelationService";
 
 const testCases = [
   { id: "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1", expected: "Maven" },

@@ -103,6 +103,76 @@ const versionMismatch = hasMatchingCPE(
   "Maven"
 );
 
-assert.equal(versionMismatch.status, "INDETERMINATE");
+assert.equal(versionMismatch.status, "NO_MATCH");
 
 console.log("All configuration assertions passed.");
+
+// Test: OR succeeds when one condition matches.
+const orResult = hasMatchingCPE(
+  {
+    operator: "OR",
+    nodes: [
+      {
+        cpeMatch: [{
+          vulnerable: true,
+          criteria: "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+          versionStartIncluding: "2.13.0",
+          versionEndExcluding: "2.15.0",
+        }],
+      },
+      {
+        cpeMatch: [{
+          vulnerable: true,
+          criteria: "cpe:2.3:a:apache:tomcat:*:*:*:*:*:*:*:*",
+        }],
+      },
+    ],
+  },
+  "2.14.1",
+  "log4j-core",
+  "Maven"
+);
+
+assert.equal(orResult.status, "MATCH");
+
+// Test: Negating a confirmed match produces NO_MATCH.
+const negateResult = hasMatchingCPE(
+  {
+    operator: "OR",
+    nodes: [{
+      negate: true,
+      cpeMatch: [{
+        vulnerable: true,
+        criteria: "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+        versionStartIncluding: "2.13.0",
+        versionEndExcluding: "2.15.0",
+      }],
+    }],
+  },
+  "2.14.1",
+  "log4j-core",
+  "Maven"
+);
+
+assert.equal(negateResult.status, "NO_MATCH");
+
+// Test: Negating an indeterminate condition stays indeterminate.
+const negateUnknownResult = hasMatchingCPE(
+  {
+    operator: "OR",
+    nodes: [{
+      negate: true,
+      cpeMatch: [{
+        vulnerable: false,
+        criteria: "cpe:2.3:o:microsoft:windows_10:*:*:*:*:*:*:*:*",
+      }],
+    }],
+  },
+  "2.14.1",
+  "log4j-core",
+  "Maven"
+);
+
+assert.equal(negateUnknownResult.status, "INDETERMINATE");
+
+console.log("Nested AND/OR and negation tests passed.");
