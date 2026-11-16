@@ -43,9 +43,9 @@ export function normalizeComponent(
     supplier: component.supplier,
     packageId: component.packageId,
     ecosystem,
-    dependencies: component.dependencies,
-    licenses: component.licenses,
-    hashes: component.hashes,
+    dependencies: [...component.dependencies],
+    licenses: [...component.licenses],
+    hashes: [...component.hashes],
   };
 }
 

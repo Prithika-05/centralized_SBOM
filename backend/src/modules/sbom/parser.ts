@@ -15,18 +15,13 @@ export interface ParsedSBOM {
   components: ParsedComponent[];
 }
 
+
 export function parseCycloneDX(data: any): ParsedSBOM {
   const components: ParsedComponent[] = [];
+  const componentMap = new Map<string, ParsedComponent>();
 
-  if (!Array.isArray(data.components)) {
-    return {
-      format: "CycloneDX",
-      components,
-    };
-  }
-
-  // First, parse all components.
-  for (const component of data.components) {
+  // Parse a CycloneDX component and register its bom-ref.
+  const addComponent = (component: any): ParsedComponent => {
     const licenses: string[] = [];
 
     if (Array.isArray(component.licenses)) {
@@ -49,7 +44,7 @@ export function parseCycloneDX(data: any): ParsedSBOM {
       }
     }
 
-    components.push({
+    const parsedComponent: ParsedComponent = {
       name: component.name || "Unknown",
       version: component.version || "Unknown",
       supplier: component.supplier?.name,
@@ -57,28 +52,30 @@ export function parseCycloneDX(data: any): ParsedSBOM {
       dependencies: [],
       licenses,
       hashes,
-    });
+    };
+
+    components.push(parsedComponent);
+
+    if (component["bom-ref"]) {
+      componentMap.set(component["bom-ref"], parsedComponent);
+    }
+
+    return parsedComponent;
+  };
+
+  // 1. Parse the root application from CycloneDX metadata.
+  if (data.metadata?.component) {
+    addComponent(data.metadata.component);
   }
 
-  // Build a lookup from CycloneDX bom-ref values to components.
-  const componentMap = new Map<string, ParsedComponent>();
-
-  for (const component of data.components) {
-    if (component["bom-ref"]) {
-      const parsedComponent = components.find(
-        (item) =>
-          item.name === (component.name || "Unknown") &&
-          item.version === (component.version || "Unknown") &&
-          item.packageId === component.purl
-      );
-
-      if (parsedComponent) {
-        componentMap.set(component["bom-ref"], parsedComponent);
-      }
+  // 2. Parse all regular components.
+  if (Array.isArray(data.components)) {
+    for (const component of data.components) {
+      addComponent(component);
     }
   }
 
-  // Process top-level CycloneDX dependency relationships.
+  // 3. Process top-level dependency relationships.
   if (Array.isArray(data.dependencies)) {
     for (const dependency of data.dependencies) {
       const source = componentMap.get(dependency.ref);
@@ -87,7 +84,11 @@ export function parseCycloneDX(data: any): ParsedSBOM {
         continue;
       }
 
-      source.dependencies.push(...dependency.dependsOn);
+      source.dependencies.push(
+        ...dependency.dependsOn.filter(
+          (id: string) => !source.dependencies.includes(id)
+        )
+      );
     }
   }
 
