@@ -461,3 +461,193 @@ a:hover {
     flex-direction: column;
   }
 }
+
+/* =========================================================
+   RESPONSIVE DASHBOARD LAYOUT — CREATORHUB SECURITY
+   Layout only: preserves existing colours and functionality
+   ========================================================= */
+
+/* Main dashboard: two panels on desktop */
+main {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 24px;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+/* Header spans the full dashboard width */
+main > .text-center {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0 !important;
+  padding: 12px 0 20px;
+}
+
+/* Keep both main cards aligned and equally sized */
+main > [data-slot="card"],
+main > .card {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  margin: 0 !important;
+}
+
+/* Prevent Tailwind vertical spacing from interfering with grid gaps */
+main > * {
+  min-width: 0;
+  margin-top: 0 !important;
+}
+
+/* Consistent card content sizing */
+main [data-slot="card-content"] {
+  min-width: 0;
+}
+
+/* Component ID takes the full row; package/version share a row */
+main .grid.grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Prevent long vulnerability information from expanding cards */
+.dashboard-card,
+.vulnerability-item,
+.cpe-evidence {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Results use the full width of the dashboard card */
+.dashboard-grid {
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-grid .col-span-full {
+  grid-column: 1 / -1;
+}
+
+/* Tablet layout */
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 720px !important;
+    gap: 20px;
+  }
+
+  main > .text-center {
+    grid-column: 1;
+  }
+
+  main > [data-slot="card"],
+  main > .card {
+    height: auto;
+  }
+}
+
+/* Mobile layout */
+@media (max-width: 600px) {
+  .container,
+  main {
+    width: 100% !important;
+    padding: 0 !important;
+  }
+
+  main {
+    gap: 16px;
+  }
+
+  main > .text-center {
+    padding: 10px 4px 16px;
+  }
+
+  main > .text-center h1 {
+    font-size: clamp(25px, 8vw, 34px) !important;
+    line-height: 1.2;
+  }
+
+  main > [data-slot="card"],
+  main > .card {
+    border-radius: 12px !important;
+  }
+
+  main [data-slot="card-header"],
+  main [data-slot="card-content"] {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-grid .col-span-full {
+    grid-column: auto;
+  }
+
+  .raw-details {
+    grid-column: auto;
+  }
+}
+
+/* Very narrow mobile screens */
+@media (max-width: 380px) {
+  main .grid.grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main > .text-center h1 {
+    font-size: 25px !important;
+  }
+
+  main [data-slot="card-header"],
+  main [data-slot="card-content"] {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+
+/* =========================================================
+   SBOM FILE SELECTOR — ALIGNMENT FIX ONLY
+   ========================================================= */
+
+#sbom-file {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 44px;
+  min-width: 0;
+  padding: 5px 9px !important;
+  line-height: normal;
+  overflow: hidden;
+  text-align: left;
+}
+
+#sbom-file::file-selector-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  margin: 0 12px 0 0;
+  padding: 0 14px;
+  border: 1px solid rgba(57, 255, 136, 0.3);
+  border-radius: 6px;
+  background: rgba(57, 255, 136, 0.08);
+  color: #39ff88;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+#sbom-file::file-selector-button:hover {
+  background: rgba(57, 255, 136, 0.18);
+  border-color: #39ff88;
+}

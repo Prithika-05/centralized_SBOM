@@ -281,13 +281,13 @@ function App() {
 
   return (
     // CENTERED LAYOUT CONTAINER
-    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen w-full flex items-start justify-center px-4 py-8 sm:px-6 lg:px-8 relative">
       
       {/* Ambient Glow Effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-green-500/5 rounded-full blur-[100px] pointer-events-none" />
       
       {/* MAIN FORM CARD */}
-      <main className="w-full max-w-md relative z-10 space-y-6">
+      <main className="w-full max-w-6xl relative z-10 space-y-6">
         
         {/* Header / Title Block */}
         <div className="text-center space-y-2 mb-6">
