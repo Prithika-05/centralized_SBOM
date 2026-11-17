@@ -84,11 +84,21 @@ export function parseCycloneDX(data: any): ParsedSBOM {
         continue;
       }
 
-      source.dependencies.push(
-        ...dependency.dependsOn.filter(
-          (id: string) => !source.dependencies.includes(id)
-        )
-      );
+      for (const targetRef of dependency.dependsOn) {
+      const targetComponent = componentMap.get(targetRef);
+
+      if (!targetComponent) {
+        continue;
+      }
+
+      const targetId =
+        targetComponent.packageId ||
+        `${targetComponent.name}@${targetComponent.version}`;
+
+      if (!source.dependencies.includes(targetId)) {
+        source.dependencies.push(targetId);
+      }
+    }
     }
   }
 
@@ -97,6 +107,7 @@ export function parseCycloneDX(data: any): ParsedSBOM {
     components,
   };
 }
+
 
 export function parseSPDX(data: any): ParsedSBOM {
   const components: ParsedComponent[] = [];
@@ -108,7 +119,7 @@ export function parseSPDX(data: any): ParsedSBOM {
     };
   }
 
-  // Build a map of SPDX package IDs to component indexes
+  // Map SPDX package identifiers to component indexes.
   const packageMap = new Map<string, number>();
 
   data.packages.forEach((pkg: any, index: number) => {
@@ -117,7 +128,7 @@ export function parseSPDX(data: any): ParsedSBOM {
     }
   });
 
-  // First parse the packages
+  // Parse all SPDX packages.
   for (const pkg of data.packages) {
     const licenses: string[] = [];
 
@@ -146,22 +157,27 @@ export function parseSPDX(data: any): ParsedSBOM {
       name: pkg.name || "Unknown",
       version: pkg.versionInfo || "Unknown",
       supplier: pkg.supplier,
-      packageId: pkg.externalRefs?.[0]?.referenceLocator,
+      packageId: pkg.externalRefs?.find(
+        (ref: any) =>
+          ref.referenceCategory === "PACKAGE-MANAGER" &&
+          ref.referenceType === "purl"
+      )?.referenceLocator,
       dependencies: [],
       licenses,
       hashes,
     });
   }
 
-  // Process SPDX document-level relationships
+  // Process SPDX dependency relationships.
   if (Array.isArray(data.relationships)) {
     for (const relationship of data.relationships) {
       if (relationship.relationshipType !== "DEPENDS_ON") {
         continue;
       }
 
+      // SPDX 2.3 uses spdxElementId.
       const sourceIndex = packageMap.get(
-        relationship.spdxElement
+        relationship.spdxElementId
       );
 
       const targetIndex = packageMap.get(
@@ -169,19 +185,26 @@ export function parseSPDX(data: any): ParsedSBOM {
       );
 
       if (
-        sourceIndex !== undefined &&
-        targetIndex !== undefined
+        sourceIndex === undefined ||
+        targetIndex === undefined
       ) {
-        const targetPackage = data.packages[targetIndex];
+        continue;
+      }
 
-        const dependencyId =
-          targetPackage.externalRefs?.[0]?.referenceLocator ||
-          targetPackage.SPDXID ||
-          targetPackage.name;
+      const targetPackage = data.packages[targetIndex];
 
-        components[sourceIndex].dependencies.push(
-          dependencyId
-        );
+      const dependencyId =
+        targetPackage.externalRefs?.find(
+          (ref: any) =>
+            ref.referenceCategory === "PACKAGE-MANAGER" &&
+            ref.referenceType === "purl"
+        )?.referenceLocator ||
+        `${targetPackage.name}@${targetPackage.versionInfo || "Unknown"}`;
+
+      const sourceComponent = components[sourceIndex];
+
+      if (!sourceComponent.dependencies.includes(dependencyId)) {
+        sourceComponent.dependencies.push(dependencyId);
       }
     }
   }
@@ -191,6 +214,7 @@ export function parseSPDX(data: any): ParsedSBOM {
     components,
   };
 }
+
 
 export function parseSBOM(
   data: any,
