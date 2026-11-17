@@ -23,6 +23,62 @@ function App() {
   const [reportMessage, setReportMessage] = useState("");
   const [reportResult, setReportResult] = useState<unknown>(null);
 
+  function handleComponentSelect(selectedId: string) {
+    const selected = getUploadedComponents().find(
+      (component) => component.id === selectedId
+    );
+
+    setComponentId(selected?.id ?? "");
+    setPackageName(selected?.name ?? "");
+    setPackageVersion(selected?.version ?? "");
+
+    setAnalysisResult(null);
+    setAnalysisMessage("");
+    setReportResult(null);
+    setReportMessage("");
+  }
+
+  function getUploadedComponents(): {
+    id: string;
+    name: string;
+    version: string;
+  }[] {
+    if (typeof result !== "object" || result === null) {
+      return [];
+    }
+
+    const normalizedSBOM = (result as Record<string, any>).normalizedSBOM;
+
+    if (
+      typeof normalizedSBOM !== "object" ||
+      normalizedSBOM === null ||
+      !Array.isArray(normalizedSBOM.components)
+    ) {
+      return [];
+    }
+
+    return normalizedSBOM.components.filter(
+      (component: any) =>
+        typeof component.id === "string" &&
+        typeof component.name === "string" &&
+        typeof component.version === "string"
+    );
+  }
+
+  function getUploadSummary() {
+    if (typeof result !== "object" || result === null) {
+      return null;
+    }
+
+    const data = result as Record<string, any>;
+
+    return {
+      format: data.format ?? "Unknown",
+      valid: data.validation?.valid ?? false,
+      componentCount: data.normalizedSBOM?.components?.length ?? 0,
+    };
+  }
+
   async function handleUpload() {
     if (!file) {
       setMessage("Please select an SBOM file first.");
@@ -375,16 +431,63 @@ function App() {
                 <AlertTitle className="text-xs font-bold uppercase">{isSuccess ? "Success" : "Error"}</AlertTitle>
                 <AlertDescription className="text-xs mt-0.5 font-mono opacity-90">{message}</AlertDescription>
               </Alert>
-            )}
+            )}            
+            {isSuccess && result !== null && (
+              <div className="rounded-lg border border-green-500/20 bg-green-950/10 p-4 space-y-3">
 
-            {result !== null && (
-              <div className="rounded border border-green-500/20 bg-black/80 p-3 overflow-x-auto">
-                <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-green-500 uppercase tracking-wider">
-                  <Terminal className="h-3 w-3" /> Response Data
+                <div className="flex items-center gap-2 text-green-400">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <h3 className="font-semibold text-sm">
+                    SBOM Processing Summary
+                  </h3>
                 </div>
-                <pre className="text-[10px] font-mono whitespace-pre-wrap break-all text-green-300/70 bg-black/50 p-2 rounded border border-green-500/10">
-                  {JSON.stringify(result, null, 2)}
-                </pre>
+
+                {(() => {
+                  const summary = getUploadSummary();
+
+                  if (!summary) return null;
+
+                  return (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded bg-black/40 p-3">
+                        <p className="text-xs text-green-600">SBOM Format</p>
+                        <p className="text-sm font-semibold text-green-300">
+                          {summary.format}
+                        </p>
+                      </div>
+
+                      <div className="rounded bg-black/40 p-3">
+                        <p className="text-xs text-green-600">Validation</p>
+                        <p className="text-sm font-semibold text-green-300">
+                          {summary.valid ? "Passed" : "Failed"}
+                        </p>
+                      </div>
+
+                      <div className="rounded bg-black/40 p-3 col-span-2">
+                        <p className="text-xs text-green-600">
+                          Components Identified
+                        </p>
+                        <p className="text-xl font-bold text-green-300">
+                          {summary.componentCount}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <p className="text-xs text-green-500/70">
+                  Your SBOM has been processed successfully.
+                </p>
+
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-xs text-green-400">
+                    View complete upload response
+                  </summary>
+                  <pre className="result mt-2">
+                    {JSON.stringify(result, null, 2)}
+                  </pre>
+                </details>
+
               </div>
             )}
           </CardContent>
@@ -409,45 +512,80 @@ function App() {
           </CardHeader>
 
           <CardContent className="pt-6 space-y-4">
+            
+{isSuccess && (
+  <div className="space-y-2">
+    <label
+      htmlFor="componentSelect"
+      className="text-xs font-bold text-cyan-500 uppercase tracking-wider"
+    >
+      Select Component
+    </label>
+
+    <select
+      id="componentSelect"
+      value={componentId}
+      onChange={(event) => handleComponentSelect(event.target.value)}
+      className="w-full h-10 rounded-md bg-black/50 border border-cyan-500/20 px-3 text-sm text-cyan-300 focus:border-cyan-400 focus:outline-none"
+    >
+      <option value="">Choose a component from the uploaded SBOM</option>
+
+      {getUploadedComponents().map((component) => (
+        <option key={component.id} value={component.id}>
+          {component.name} — {component.version}
+        </option>
+      ))}
+    </select>
+
+    <p className="text-xs text-cyan-600/70">
+      Select a component to automatically populate its details.
+    </p>
+          </div>
+          )}
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-cyan-500 uppercase tracking-wider">
+              Component ID
+            </label>
+
+            <Input
+              value={componentId}
+              readOnly
+              placeholder="Select a component above"
+              className="bg-black/50 border-cyan-500/20 text-cyan-300 font-mono text-sm"
+            />
+            <p className="text-xs text-cyan-600/70">
+              Automatically populated from the normalized SBOM.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <label htmlFor="componentId" className="text-xs font-bold text-cyan-500 uppercase tracking-wider">
-                Component ID
+              <label className="text-xs font-bold text-cyan-500 uppercase tracking-wider">
+                Package
               </label>
+
               <Input
-                id="componentId"
-                type="text"
-                value={componentId}
-                onChange={(event) => setComponentId(event.target.value)}
-                placeholder="pkg:npm/example-library@1.0.0"
-                className="bg-black/50 border-cyan-500/20 focus:border-cyan-400 focus:ring-cyan-500/20 text-cyan-300 placeholder:text-cyan-800 font-mono text-sm h-9"
+                value={packageName}
+                readOnly
+                placeholder="Package name"
+                className="bg-black/50 border-cyan-500/20 text-cyan-300 font-mono text-sm"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <label htmlFor="packageName" className="text-xs font-bold text-cyan-500 uppercase tracking-wider">Package</label>
-                <Input
-                  id="packageName"
-                  type="text"
-                  value={packageName}
-                  onChange={(event) => setPackageName(event.target.value)}
-                  placeholder="example-lib"
-                  className="bg-black/50 border-cyan-500/20 focus:border-cyan-400 focus:ring-cyan-500/20 text-cyan-300 placeholder:text-cyan-800 font-mono text-sm h-9"
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="packageVersion" className="text-xs font-bold text-cyan-500 uppercase tracking-wider">Version</label>
-                <Input
-                  id="packageVersion"
-                  type="text"
-                  value={packageVersion}
-                  onChange={(event) => setPackageVersion(event.target.value)}
-                  placeholder="1.0.0"
-                  className="bg-black/50 border-cyan-500/20 focus:border-cyan-400 focus:ring-cyan-500/20 text-cyan-300 placeholder:text-cyan-800 font-mono text-sm h-9"
-                />
-              </div>
-            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-cyan-500 uppercase tracking-wider">
+                Version
+              </label>
 
+              <Input
+                value={packageVersion}
+                readOnly
+                placeholder="Package version"
+                className="bg-black/50 border-cyan-500/20 text-cyan-300 font-mono text-sm"
+              />
+            </div>
+          </div>
             <Button
               onClick={handleAnalyze}
               disabled={analysisLoading}
