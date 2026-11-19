@@ -713,11 +713,13 @@ function App() {
                           )}
                           </div>
                         ))}
-                      <h4>NVD Findings</h4>
+                     <h4>NVD Findings</h4>
                       {renderVulnerabilityList("nvd")}
 
-                      <h4>OSV Findings</h4>
-                      {renderVulnerabilityList("osv")}
+                      <p className="text-sm text-muted-foreground">
+                        OSV findings are consolidated in the Unified Vulnerability Findings
+                        section above, with duplicate identifiers merged.
+                      </p>
                     </>
                   ) : (
                     <p>Vulnerability results are unavailable.</p>

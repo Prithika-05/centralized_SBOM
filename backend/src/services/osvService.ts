@@ -1,9 +1,35 @@
+
+export interface OSVAffectedRangeEvent {
+  introduced?: string;
+  fixed?: string;
+  last_affected?: string;
+  limit?: string;
+}
+
+export interface OSVAffectedRange {
+  type?: string;
+  events?: OSVAffectedRangeEvent[];
+}
+
+export interface OSVAffectedPackage {
+  ecosystem?: string;
+  name?: string;
+  purl?: string;
+}
+
+export interface OSVAffectedVersion {
+  package?: OSVAffectedPackage;
+  ranges?: OSVAffectedRange[];
+  versions?: string[];
+}
+
 export interface OSVVulnerability {
   id: string;
   aliases: string[];
   summary: string;
   severity?: string;
   cvssScore?: number;
+  affected?: OSVAffectedVersion[];
 }
 
 interface OSVSeverity {
@@ -15,6 +41,7 @@ interface OSVVulnerabilityResponse {
   id: string;
   aliases?: string[];
   summary?: string;
+  affected?: OSVAffectedVersion[];
   database_specific?: {
     severity?: string;
     cvss_score?: number;
@@ -75,6 +102,7 @@ export async function searchOSV(
           ? databaseSeverity.toUpperCase()
           : undefined,
       cvssScore: numericCvssScore,
+      affected: vulnerability.affected || [],
     };
   });
 }
