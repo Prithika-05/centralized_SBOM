@@ -803,30 +803,106 @@ function App() {
                   {renderImpactedComponents()}
                 </article>
 
+
                 <article className="dashboard-card">
                   <h3>CRA Validation</h3>
+
                   {getAnalysisSection("craValidation") ? (
-                    <>
-                      <p>
-                        Result:{" "}
-                        {getAnalysisSection("craValidation")?.compliant
-                          ? "All prototype checks passed"
-                          : "Some prototype checks failed"}
-                      </p>
-                      <p>
-                        Checks passed:{" "}
-                        {getAnalysisSection("craValidation")?.results?.filter(
-                          (item: any) => item.passed
-                        ).length ?? 0}
-                        {" / "}
-                        {getAnalysisSection("craValidation")?.results?.length ?? 0}
-                      </p>
-                    </>
+                    (() => {
+                      const cra = getAnalysisSection("craValidation");
+                      const results = Array.isArray(cra?.results) ? cra.results : [];
+                      const passedCount = results.filter(
+                        (item: any) => item.passed
+                      ).length;
+                      const failedCount = results.length - passedCount;
+
+                      return (
+                        <div className="space-y-4">
+                          <p>
+                            Result:{" "}
+                            <strong>
+                              {cra?.compliant
+                                ? "All prototype checks passed"
+                                : "Some prototype checks failed"}
+                            </strong>
+                          </p>
+
+                          <p>
+                            Checks passed: {passedCount} / {results.length}
+                          </p>
+
+                          <p>
+                            Checks failed: {failedCount}
+                          </p>
+
+                          <div className="space-y-3">
+                            {results.map((item: any) => (
+                              <div
+                                key={item.ruleId}
+                                className="vulnerability-item"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <strong>
+                                    {item.ruleId}: {item.ruleName}
+                                  </strong>
+
+                                  <span
+                                    className={
+                                      item.passed
+                                        ? "text-green-400 font-semibold"
+                                        : "text-red-400 font-semibold"
+                                    }
+                                  >
+                                    {item.passed ? "PASSED" : "FAILED"}
+                                  </span>
+                                </div>
+
+                                <p>{item.message}</p>
+
+                                <div className="mt-2 space-y-2 text-sm">
+                                  <p>
+                                    <strong>Expected:</strong>{" "}
+                                    {item.expected ?? "Not provided"}
+                                  </p>
+
+                                  <p>
+                                    <strong>Actual:</strong>{" "}
+                                    {item.actual ?? "Not provided"}
+                                  </p>
+
+                                  {!item.passed && (
+                                    <div className="rounded border border-red-500/30 bg-red-950/20 p-3 space-y-2">
+                                      <p className="text-red-400 font-semibold">
+                                        Failure reason
+                                      </p>
+
+                                      <p>
+                                        {item.failureReason ??
+                                          item.message ??
+                                          "No failure details provided by the backend."}
+                                      </p>
+
+                                      <p className="text-cyan-400 font-semibold">
+                                        Suggested action
+                                      </p>
+
+                                      <p>
+                                        {item.suggestedAction ??
+                                          "Check the backend logs and the corresponding validation rule."}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()
                   ) : (
                     <p>CRA results are unavailable.</p>
                   )}
                 </article>
-
                 <details className="dashboard-card raw-details col-span-full">
                   <summary>View complete analysis response</summary>
                   <pre className="result">
