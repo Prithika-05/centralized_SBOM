@@ -49,6 +49,16 @@ router.post("/upload", upload.single("sbom"), async (req, res, next) => {
     // 6. Normalize parsed SBOM
     const normalizedSBOM = normalizeSBOM(parsedSBOM);
 
+    console.log(
+      "PARSED SBOM COMPONENTS:",
+      JSON.stringify(parsedSBOM.components, null, 2)
+    );
+
+    console.log(
+      "NORMALIZED SBOM COMPONENTS:",
+      JSON.stringify(normalizedSBOM.components, null, 2)
+    );
+
     await storeSBOM(normalizedSBOM);
 
     // 7. Return result

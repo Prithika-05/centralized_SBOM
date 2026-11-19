@@ -56,8 +56,31 @@ export function parseCycloneDX(data: any): ParsedSBOM {
 
     components.push(parsedComponent);
 
+    // Register the original CycloneDX bom-ref.
     if (component["bom-ref"]) {
       componentMap.set(component["bom-ref"], parsedComponent);
+    }
+
+console.log(
+  "REFERENCE REGISTERED:",
+  component["bom-ref"],
+  "->",
+  componentMap.get(component["bom-ref"])?.name
+);
+    // Register the canonical name@version only if it is not already used.
+    const canonicalRef = `${component.name}@${component.version}`;
+
+    if (
+      component.name &&
+      component.version &&
+      !componentMap.has(canonicalRef)
+    ) {
+      componentMap.set(canonicalRef, parsedComponent);
+    }
+
+    // Register the name alias only if it is not already used.
+    if (component.name && !componentMap.has(component.name)) {
+      componentMap.set(component.name, parsedComponent);
     }
 
     return parsedComponent;
@@ -75,32 +98,71 @@ export function parseCycloneDX(data: any): ParsedSBOM {
     }
   }
 
+  console.log(
+  "REGISTERED COMPONENT REFERENCES:",
+  Array.from(componentMap.keys())
+);
+
+  console.log(
+  "ROOT COMPONENT:",
+  components[0]?.name,
+  components[0]?.version
+);
   // 3. Process top-level dependency relationships.
   if (Array.isArray(data.dependencies)) {
     for (const dependency of data.dependencies) {
       const source = componentMap.get(dependency.ref);
+      console.log("SOURCE LOOKUP DETAILS:", {
+        requestedRef: dependency.ref,
+        resolvedName: source?.name,
+        resolvedVersion: source?.version,
+        resolvedPackageId: source?.packageId,
+        isRoot: source?.name === data.metadata?.component?.name,
+      });
 
       if (!source || !Array.isArray(dependency.dependsOn)) {
         continue;
       }
 
       for (const targetRef of dependency.dependsOn) {
-      const targetComponent = componentMap.get(targetRef);
+        const targetComponent = componentMap.get(targetRef);
 
-      if (!targetComponent) {
-        continue;
+        if (!targetComponent) {
+          continue;
+        }
+
+        console.log("DEPENDENCY OBJECT CHECK:", {
+  sourceName: source.name,
+  sourceVersion: source.version,
+  targetName: targetComponent.name,
+  targetVersion: targetComponent.version,
+  sameObject: source === targetComponent,
+  sourcePackageId: source.packageId,
+  targetPackageId: targetComponent.packageId,
+});
+
+        // Prevent a component from depending on itself.
+        if (source === targetComponent) {
+          console.warn(
+            "Skipping self-dependency:",
+            dependency.ref,
+            "->",
+            targetRef
+          );
+          continue;
+        }
+
+        const targetId =
+          targetComponent.packageId ||
+          `${targetComponent.name}@${targetComponent.version}`;
+
+        if (!source.dependencies.includes(targetId)) {
+          source.dependencies.push(targetId);
+        }
       }
-
-      const targetId =
-        targetComponent.packageId ||
-        `${targetComponent.name}@${targetComponent.version}`;
-
-      if (!source.dependencies.includes(targetId)) {
-        source.dependencies.push(targetId);
-      }
-    }
     }
   }
+
 
   return {
     format: "CycloneDX",
