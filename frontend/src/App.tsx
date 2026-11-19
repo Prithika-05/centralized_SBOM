@@ -675,7 +675,72 @@ function App() {
                             </p>
 
                             <p>{vulnerability.description}</p>
+                            {Array.isArray(vulnerability.affected) &&
+                              vulnerability.affected.length > 0 && (
+                                <div className="cpe-evidence">
+                                  <strong>OSV Affected-Version Information</strong>
 
+                                  {vulnerability.affected.map(
+                                    (affectedItem: any, affectedIndex: number) => (
+                                      <div key={affectedIndex}>
+                                        <p>
+                                          Package:{" "}
+                                          {affectedItem.package?.name ?? "Unknown"}
+                                        </p>
+
+                                        <p>
+                                          Ecosystem:{" "}
+                                          {affectedItem.package?.ecosystem ?? "Unknown"}
+                                        </p>
+
+                                        {affectedItem.package?.purl && (
+                                          <p>
+                                            Package URL: {affectedItem.package.purl}
+                                          </p>
+                                        )}
+
+                                        {affectedItem.ranges?.map(
+                                          (range: any, rangeIndex: number) => (
+                                            <div key={rangeIndex}>
+                                              <p>Range type: {range.type ?? "Unknown"}</p>
+
+                                              {range.events?.map(
+                                                (event: any, eventIndex: number) => (
+                                                  <p key={eventIndex}>
+                                                    {event.introduced !== undefined &&
+                                                      `Introduced: ${event.introduced}`}
+                                                    {event.fixed !== undefined &&
+                                                      `Fixed: ${event.fixed}`}
+                                                    {event.last_affected !== undefined &&
+                                                      `Last affected: ${event.last_affected}`}
+                                                    {event.limit !== undefined &&
+                                                      `Limit: ${event.limit}`}
+                                                  </p>
+                                                )
+                                              )}
+                                            </div>
+                                          )
+                                        )}
+
+                                        {Array.isArray(affectedItem.versions) &&
+                                          affectedItem.versions.length > 0 && (
+                                            <details>
+                                              <summary>
+                                                View affected versions (
+                                                {affectedItem.versions.length}
+                                                )
+                                              </summary>
+
+                                              <p>
+                                                {affectedItem.versions.join(", ")}
+                                              </p>
+                                            </details>
+                                          )}
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              )}
                             {vulnerability.cvssScore !== undefined && (
                               <p>CVSS Score: {vulnerability.cvssScore}</p>
                             )}
