@@ -1,0 +1,46 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "name": "my-application",
+      "version": "1.0.0",
+      "bom-ref": "my-application"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "library-a",
+      "version": "1.0.0",
+      "purl": "pkg:npm/library-a@1.0.0",
+      "bom-ref": "library-a"
+    },
+    {
+        "type": "library",
+        "name": "log4j-core",
+        "version": "2.25.5",
+        "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.25.5",
+        "bom-ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.25.5"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "my-application",
+      "dependsOn": ["library-a"]
+    },
+    {
+      "ref": "library-a",
+      "dependsOn": [
+        "pkg:maven/org.apache.logging.log4j/log4j-core@2.25.5"
+      ]
+    },
+    {
+      "ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.25.5",
+      "dependsOn": []
+    }
+  ]
+
+}

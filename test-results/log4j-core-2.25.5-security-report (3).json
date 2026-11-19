@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-11-19T13:26:31.805Z",
+  "component": {
+    "id": "pkg:maven/org.apache.logging.log4j/log4j-core@2.25.5",
+    "name": "log4j-core",
+    "version": "2.25.5"
+  },
+  "vulnerabilityAnalysis": {
+    "componentId": "pkg:maven/org.apache.logging.log4j/log4j-core@2.25.5",
+    "name": "log4j-core",
+    "version": "2.25.5",
+    "vulnerabilities": {
+      "nvd": [],
+      "osv": []
+    },
+    "severity": "UNKNOWN",
+    "unifiedVulnerabilities": []
+  },
+  "impactAnalysis": {
+    "impactedComponents": [
+      {
+        "id": "pkg:npm/library-a@1.0.0",
+        "name": "library-a",
+        "version": "1.0.0"
+      },
+      {
+        "id": "my-application@1.0.0",
+        "name": "my-application",
+        "version": "1.0.0"
+      }
+    ]
+  },
+  "craValidation": {
+    "compliant": true,
+    "results": [
+      {
+        "ruleId": "CRA-001",
+        "ruleName": "SBOM Available",
+        "passed": true,
+        "message": "SBOM is available."
+      },
+      {
+        "ruleId": "CRA-002",
+        "ruleName": "Vulnerability Detection",
+        "passed": true,
+        "message": "Vulnerability analysis completed; 0 findings recorded."
+      },
+      {
+        "ruleId": "CRA-003",
+        "ruleName": "Dependency Analysis",
+        "passed": true,
+        "message": "Dependency information is available."
+      },
+      {
+        "ruleId": "CRA-004",
+        "ruleName": "Vulnerability Impact Analysis",
+        "passed": true,
+        "message": "Vulnerability impact analysis is available."
+      }
+    ]
+  }
+}
