@@ -1,3 +1,4 @@
+
 import {
   correlateComponent,
   buildUnifiedVulnerabilities,
@@ -12,32 +13,41 @@ import { hasValidatedSBOM } from "./sbomGraphService.js";
 export async function analyzeComponent(
   componentId: string,
   name: string,
-  version: string
+  version: string,
+  sbomId: string
 ) {
   const vulnerabilityAnalysis = await correlateComponent(
     componentId,
     name,
     version
   );
+
   const unifiedVulnerabilities = buildUnifiedVulnerabilities(
     vulnerabilityAnalysis.vulnerabilities
   );
-  const impactedComponents = await findImpactedComponents(componentId);
 
-  const hasDependencies =
-  await hasDependencyRelationships(componentId);
+  const impactedComponents = await findImpactedComponents(
+    componentId,
+    sbomId
+  );
+
+  const hasDependencies = await hasDependencyRelationships(
+    componentId,
+    sbomId
+  );
+
   const hasImpactAnalysis = Array.isArray(impactedComponents);
   const vulnerabilityAnalysisCompleted = !!vulnerabilityAnalysis;
-  const hasSBOM = await hasValidatedSBOM(componentId);
+  const hasSBOM = await hasValidatedSBOM(componentId, sbomId);
 
   const vulnerabilityCount = unifiedVulnerabilities.length;
 
   const craValidation = validateCRA(
-    hasSBOM,                           // hasSBOM
-    vulnerabilityAnalysisCompleted,  // vulnerabilityAnalysisCompleted
-    vulnerabilityCount,               // vulnerabilityCount
-    hasDependencies,                  // hasDependencies
-    hasImpactAnalysis                 // hasImpactAnalysis
+    hasSBOM,
+    vulnerabilityAnalysisCompleted,
+    vulnerabilityCount,
+    hasDependencies,
+    hasImpactAnalysis
   );
 
   return {

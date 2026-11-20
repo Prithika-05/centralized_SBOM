@@ -250,14 +250,27 @@ app.get("/api/components/:componentId/vulnerability-analysis", async (req, res) 
   }
 });
 
+
 app.get("/api/components/:componentId/impact-analysis", async (req, res) => {
   try {
     const componentId = req.params.componentId;
+    const sbomId = String(req.query.sbomId ?? "");
 
-    const impactedComponents = await findImpactedComponents(componentId);
+    if (!sbomId) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "sbomId query parameter is required",
+      });
+    }
+
+    const impactedComponents = await findImpactedComponents(
+      componentId,
+      sbomId
+    );
 
     res.json({
       componentId,
+      sbomId,
       impactedComponents,
     });
   } catch (error) {
@@ -277,24 +290,25 @@ app.get("/api/components/:componentId/cra-validation", async (req, res) => {
     const componentId = req.params.componentId;
     const name = req.query.name as string;
     const version = req.query.version as string;
+    const sbomId = String(req.query.sbomId ?? "");
 
-    if (!name || !version) {
+    if (!name || !version || !sbomId) {
       return res.status(400).json({
         status: "ERROR",
-        message: "Package name and version are required",
+        message: "Package name, version, and sbomId are required",
       });
     }
 
-    // Run the actual integrated analysis
-    const analysis = await analyzeComponent(
+    const result = await analyzeComponent(
       componentId,
       name,
-      version
+      version,
+      sbomId
     );
 
     res.json({
       componentId,
-      ...analysis.craValidation,
+      ...result.craValidation,
     });
   } catch (error) {
     console.error("CRA validation failed:", error);
@@ -313,18 +327,20 @@ app.get("/api/components/:componentId/analysis", async (req, res) => {
     const componentId = req.params.componentId;
     const name = req.query.name as string;
     const version = req.query.version as string;
+    const sbomId = String(req.query.sbomId ?? "");
 
-    if (!name || !version) {
+    if (!name || !version || !sbomId) {
       return res.status(400).json({
         status: "ERROR",
-        message: "Package name and version are required",
+        message: "Package name, version, and sbomId are required",
       });
     }
 
     const result = await analyzeComponent(
       componentId,
       name,
-      version
+      version,
+      sbomId
     );
 
     res.json(result);
@@ -343,6 +359,14 @@ app.get("/api/components/:componentId/report", async (req, res) => {
     const componentId = req.params.componentId;
     const name = req.query.name as string;
     const version = req.query.version as string;
+    const sbomId = String(req.query.sbomId ?? "");
+
+    if (!sbomId) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "sbomId query parameter is required",
+      });
+    }
 
     if (!name || !version) {
       return res.status(400).json({
@@ -354,7 +378,8 @@ app.get("/api/components/:componentId/report", async (req, res) => {
     const report = await generateSecurityReport(
       componentId,
       name,
-      version
+      version,
+      sbomId
     );
 
     res.json(report);

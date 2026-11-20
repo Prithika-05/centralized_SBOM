@@ -1,3 +1,4 @@
+
 import { analyzeComponent } from "./analysisService.js";
 
 export interface SecurityReport {
@@ -15,12 +16,14 @@ export interface SecurityReport {
 export async function generateSecurityReport(
   componentId: string,
   name: string,
-  version: string
+  version: string,
+  sbomId: string
 ): Promise<SecurityReport> {
   const analysis = await analyzeComponent(
     componentId,
     name,
-    version
+    version,
+    sbomId
   );
 
   return {

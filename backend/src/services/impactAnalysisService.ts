@@ -1,3 +1,4 @@
+
 import { neo4jDriver } from "../config/neo4j.js";
 
 export interface ImpactedComponent {
@@ -7,20 +8,23 @@ export interface ImpactedComponent {
 }
 
 export async function findImpactedComponents(
-  componentId: string
+  componentId: string,
+  sbomId: string
 ): Promise<ImpactedComponent[]> {
   const session = neo4jDriver.session();
 
   try {
     const result = await session.run(
       `
-      MATCH (impacted:Component)-[:DEPENDS_ON*1..]->(vulnerable:Component {id: $componentId})
+      MATCH (impacted:Component)-[r:DEPENDS_ON*1..]->
+            (vulnerable:Component {id: $componentId})
+      WHERE ALL(rel IN r WHERE rel.sbomId = $sbomId)
       RETURN DISTINCT
         impacted.id AS id,
         impacted.name AS name,
         impacted.version AS version
       `,
-      { componentId }
+      { componentId, sbomId }
     );
 
     return result.records.map((record) => ({
@@ -33,15 +37,18 @@ export async function findImpactedComponents(
   }
 }
 
-
-export async function debugComponentGraph(componentId: string) {
+export async function debugComponentGraph(
+  componentId: string,
+  sbomId: string
+) {
   const session = neo4jDriver.session();
 
   try {
     const result = await session.run(
       `
       MATCH (c:Component {id: $componentId})
-      OPTIONAL MATCH (c)-[r:DEPENDS_ON]-(connected:Component)
+      OPTIONAL MATCH (c)-[r:DEPENDS_ON {sbomId: $sbomId}]-
+                     (connected:Component)
       RETURN
         c.id AS componentId,
         count(r) AS relationshipCount,
@@ -54,7 +61,7 @@ export async function debugComponentGraph(componentId: string) {
           END
         }) AS connectedComponents
       `,
-      { componentId }
+      { componentId, sbomId }
     );
 
     return result.records.map((record) => ({
@@ -68,7 +75,8 @@ export async function debugComponentGraph(componentId: string) {
 }
 
 export async function hasDependencyRelationships(
-  componentId: string
+  componentId: string,
+  sbomId: string
 ): Promise<boolean> {
   const session = neo4jDriver.session();
 
@@ -76,10 +84,10 @@ export async function hasDependencyRelationships(
     const result = await session.run(
       `
       MATCH (c:Component {id: $componentId})
-      OPTIONAL MATCH (c)-[r:DEPENDS_ON]-()
+      OPTIONAL MATCH (c)-[r:DEPENDS_ON {sbomId: $sbomId}]-()
       RETURN count(r) > 0 AS hasDependencies
       `,
-      { componentId }
+      { componentId, sbomId }
     );
 
     return result.records[0].get("hasDependencies");

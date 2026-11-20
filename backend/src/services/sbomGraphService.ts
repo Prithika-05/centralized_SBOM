@@ -83,8 +83,10 @@ export async function storeSBOM(
   
 }
 
+
 export async function hasValidatedSBOM(
-  componentId: string
+  componentId: string,
+  sbomId: string
 ): Promise<boolean> {
   const session = neo4jDriver.session();
 
@@ -93,10 +95,11 @@ export async function hasValidatedSBOM(
       return tx.run(
         `
         MATCH (s:SBOM)-[:CONTAINS]->(c:Component {id: $componentId})
-        WHERE s.validated = true
+        WHERE elementId(s) = $sbomId
+          AND s.validated = true
         RETURN count(s) > 0 AS validated
         `,
-        { componentId }
+        { componentId, sbomId }
       );
     });
 

@@ -22,6 +22,7 @@ function App() {
   const [reportLoading, setReportLoading] = useState(false);
   const [reportMessage, setReportMessage] = useState("");
   const [reportResult, setReportResult] = useState<unknown>(null);
+  const [sbomId, setSbomId] = useState("");
 
   function handleComponentSelect(selectedId: string) {
     const selected = getUploadedComponents().find(
@@ -80,6 +81,7 @@ function App() {
   }
 
   async function handleUpload() {
+
     if (!file) {
       setMessage("Please select an SBOM file first.");
       setIsSuccess(false);
@@ -92,6 +94,10 @@ function App() {
     setLoading(true);
     setMessage("");
     setResult(null);
+    setSbomId("");
+    setComponentId("");
+    setPackageName("");
+    setPackageVersion("");
     setIsSuccess(false);
 
     try {
@@ -99,8 +105,16 @@ function App() {
         "http://localhost:5000/api/sboms/upload",
         { method: "POST", body: formData }
       );
-
+      
       const data: unknown = await response.json();
+
+      if (response.ok && typeof data === "object" && data !== null) {
+        setSbomId(
+          typeof (data as Record<string, unknown>).sbomId === "string"
+            ? (data as Record<string, string>).sbomId
+            : ""
+        );
+      }
 
       if (!response.ok) {
         setMessage("Upload failed. Check the response below.");
@@ -131,10 +145,16 @@ function App() {
     setAnalysisResult(null);
 
     try {
-      const params = new URLSearchParams({
-        name: packageName.trim(),
-        version: packageVersion.trim(),
-      });
+      if (!sbomId) {
+  setAnalysisMessage("SBOM ID is missing. Please upload the SBOM again.");
+  return;
+}
+
+const params = new URLSearchParams({
+  name: packageName.trim(),
+  version: packageVersion.trim(),
+  sbomId: sbomId,
+});
 
       const response = await fetch(
         `http://localhost:5000/api/components/${encodeURIComponent(
@@ -161,61 +181,70 @@ function App() {
     }
   }
 
-  async function handleGenerateReport() {
-    if (!componentId.trim() || !packageName.trim() || !packageVersion.trim()) {
-      setReportMessage("Please enter all component details.");
+
+async function handleGenerateReport() {
+  if (!componentId.trim() || !packageName.trim() || !packageVersion.trim()) {
+    setReportMessage("Please enter all component details.");
+    return;
+  }
+
+  if (!sbomId) {
+    setReportMessage("SBOM ID is missing. Please upload the SBOM again.");
+    return;
+  }
+
+  setReportLoading(true);
+  setReportMessage("");
+  setReportResult(null);
+
+  try {
+    const params = new URLSearchParams({
+      name: packageName.trim(),
+      version: packageVersion.trim(),
+      sbomId: sbomId,
+    });
+
+    const response = await fetch(
+      `http://localhost:5000/api/components/${encodeURIComponent(
+        componentId.trim()
+      )}/report?${params.toString()}`
+    );
+
+    const data: unknown = await response.json();
+
+    if (!response.ok) {
+      setReportMessage("Report generation failed.");
+      setReportResult(data);
       return;
     }
 
-    setReportLoading(true);
-    setReportMessage("");
+    setReportResult(data);
 
-    try {
-      const params = new URLSearchParams({
-        name: packageName.trim(),
-        version: packageVersion.trim(),
-      });
+    const blob = new Blob(
+      [JSON.stringify(data, null, 2)],
+      { type: "application/json" }
+    );
 
-      const response = await fetch(
-        `http://localhost:5000/api/components/${encodeURIComponent(
-          componentId.trim()
-        )}/report?${params.toString()}`
-      );
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
 
-      const data: unknown = await response.json();
+    link.href = downloadUrl;
+    link.download = `${packageName.trim()}-${packageVersion.trim()}-security-report.json`;
 
-      if (!response.ok) {
-        setReportMessage("Report generation failed.");
-        setReportResult(data);
-        return;
-      }
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-      setReportResult(data);
+    window.URL.revokeObjectURL(downloadUrl);
 
-      const blob = new Blob(
-        [JSON.stringify(data, null, 2)],
-        { type: "application/json" }
-      );
-
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = downloadUrl;
-      link.download = `${packageName.trim()}-${packageVersion.trim()}-security-report.json`;
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      window.URL.revokeObjectURL(downloadUrl);
-
-      setReportMessage("Security report generated and downloaded successfully.");
-    } catch {
-      setReportMessage("Could not connect to the backend.");
-    } finally {
-      setReportLoading(false);
-    }
+    setReportMessage("Security report generated and downloaded successfully.");
+  } catch {
+    setReportMessage("Could not connect to the backend.");
+  } finally {
+    setReportLoading(false);
   }
+}
+
   
   function getAnalysisSection(key: string): Record<string, any> | null {
     if (

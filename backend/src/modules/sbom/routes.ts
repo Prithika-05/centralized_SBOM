@@ -66,6 +66,7 @@ router.post("/upload", upload.single("sbom"), async (req, res, next) => {
     // 7. Return result
     res.json({
       message: "SBOM uploaded successfully",
+      sbomId,
 
       format,
 
