@@ -3,11 +3,11 @@ import { NormalizedSBOM } from "../modules/sbom/normalizer.js";
 
 export async function storeSBOM(
   sbom: NormalizedSBOM
-): Promise<void> {
+  ): Promise<string> {
   const session = neo4jDriver.session();
 
   try {
-    await session.executeWrite(async (tx) => {
+    const sbomId = await session.executeWrite(async (tx) => {
       const result = await tx.run(
         `
         CREATE (s:SBOM {
@@ -56,7 +56,7 @@ export async function storeSBOM(
         );
       }
 
-      // Create dependency relationships
+      // Create SBOM-specific dependency relationships
       for (const component of sbom.components) {
         for (const dependency of component.dependencies) {
           await tx.run(
@@ -64,19 +64,23 @@ export async function storeSBOM(
             MATCH (source:Component {id: $sourceId})
             MATCH (target:Component {id: $targetId})
 
-            MERGE (source)-[:DEPENDS_ON]->(target)
+            MERGE (source)-[r:DEPENDS_ON {sbomId: $sbomId}]->(target)
             `,
             {
+              sbomId,
               sourceId: component.id,
               targetId: dependency,
             }
           );
         }
       }
+      return sbomId;
     });
+    return sbomId;
   } finally {
     await session.close();
   }
+  
 }
 
 export async function hasValidatedSBOM(

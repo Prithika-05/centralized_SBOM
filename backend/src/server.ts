@@ -69,46 +69,6 @@ app.get("/api/health/neo4j", async (_req, res) => {
   });
 });
 
-app.post("/api/health/neo4j/test-node", async (_req, res) => {
-  try {
-    await createTestNode();
-
-    res.json({
-      status: "OK",
-      message: "Test node created successfully",
-    });
-  } catch (error) {
-    console.error("Failed to create Neo4j test node:", error);
-
-    res.status(500).json({
-      status: "ERROR",
-      message: "Failed to create Neo4j test node",
-    });
-  }
-});
-
-app.get(
-  "/api/components/:componentId/dependencies",
-  async (req, res) => {
-    try {
-      const componentId = req.params.componentId;
-
-      const result = await getDirectDependencies(componentId);
-
-      res.json(result);
-    } catch (error) {
-      console.error(
-        "Failed to retrieve dependencies:",
-        error
-      );
-
-      res.status(500).json({
-        status: "ERROR",
-        message: "Failed to retrieve dependencies",
-      });
-    }
-  }
-);
 
 app.get(
   "/api/components/:componentId/dependencies/transitive",
@@ -116,7 +76,20 @@ app.get(
     try {
       const componentId = req.params.componentId;
 
-      const result = await getTransitiveDependencies(componentId);
+      const sbomId = String(req.query.sbomId ?? "");
+
+if (!sbomId) {
+  res.status(400).json({
+    status: "ERROR",
+    message: "sbomId query parameter is required",
+  });
+  return;
+}
+
+const result = await getTransitiveDependencies(
+  componentId,
+  sbomId
+);
 
       res.json(result);
     } catch (error) {

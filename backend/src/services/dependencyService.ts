@@ -19,7 +19,8 @@ export interface TransitiveDependencyResult {
 }
 
 export async function getDirectDependencies(
-  componentId: string
+  componentId: string,
+  sbomId: string
 ): Promise<DependencyResult> {
   const session = neo4jDriver.session();
 
@@ -27,7 +28,7 @@ export async function getDirectDependencies(
     const result = await session.run(
       `
       MATCH (source:Component {id: $componentId})
-            -[:DEPENDS_ON]->
+            -[r:DEPENDS_ON {sbomId: $sbomId}]->
             (dependency:Component)
 
       RETURN
@@ -37,6 +38,7 @@ export async function getDirectDependencies(
       `,
       {
         componentId,
+        sbomId,
       }
     );
 
@@ -53,8 +55,10 @@ export async function getDirectDependencies(
   }
 }
 
+
 export async function getTransitiveDependencies(
-  componentId: string
+  componentId: string,
+  sbomId: string
 ): Promise<TransitiveDependencyResult> {
   const session = neo4jDriver.session();
 
@@ -62,8 +66,9 @@ export async function getTransitiveDependencies(
     const result = await session.run(
       `
       MATCH (source:Component {id: $componentId})
-            -[:DEPENDS_ON*1..]->
+            -[r:DEPENDS_ON*1..]-> 
             (dependency:Component)
+      WHERE ALL(rel IN r WHERE rel.sbomId = $sbomId)
 
       RETURN DISTINCT
         dependency.id AS id,
@@ -72,6 +77,7 @@ export async function getTransitiveDependencies(
       `,
       {
         componentId,
+        sbomId,
       }
     );
 
@@ -87,4 +93,5 @@ export async function getTransitiveDependencies(
     await session.close();
   }
 }
+
 

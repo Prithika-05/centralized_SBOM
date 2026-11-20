@@ -59,7 +59,9 @@ router.post("/upload", upload.single("sbom"), async (req, res, next) => {
       JSON.stringify(normalizedSBOM.components, null, 2)
     );
 
-    await storeSBOM(normalizedSBOM);
+    const sbomId = await storeSBOM(normalizedSBOM);
+
+    console.log("STORED SBOM ID:", sbomId);
 
     // 7. Return result
     res.json({
