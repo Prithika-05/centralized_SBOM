@@ -4,7 +4,7 @@ import {
 } from "../src/services/dependencyService.js";
 
 const sbomId =
-  "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:152";
+  "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:157";
 
 async function testDependencies() {
   try {

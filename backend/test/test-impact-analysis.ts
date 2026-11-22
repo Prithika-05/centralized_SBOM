@@ -12,7 +12,10 @@ async function testCRAValidation() {
       "2.14.1",
       sbomId
     );
-
+    console.log("\n--- IMPACT ANALYSIS RESULTS ---");
+    console.log(
+    JSON.stringify(result.impactAnalysis, null, 2)
+    );
     console.log("\n--- CRA VALIDATION RESULTS ---");
     console.log(
       JSON.stringify(result.craValidation, null, 2)
