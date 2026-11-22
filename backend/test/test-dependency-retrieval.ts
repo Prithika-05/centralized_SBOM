@@ -1,10 +1,11 @@
+import { findImpactedComponents } from "../src/services/impactAnalysisService.js";
 import {
   getDirectDependencies,
   getTransitiveDependencies,
 } from "../src/services/dependencyService.js";
 
 const sbomId =
-  "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:157";
+  "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:158";
 
 async function testDependencies() {
   try {
@@ -30,6 +31,17 @@ async function testDependencies() {
     );
 
     console.log("\n--- LIBRARY-A: DIRECT ---");
+    console.log("\n--- IMPACT ANALYSIS ---");
+    console.log(
+      JSON.stringify(
+        await findImpactedComponents(
+          "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1",
+          sbomId
+        ),
+        null,
+        2
+      )
+    );
     console.log(
       JSON.stringify(
         await getDirectDependencies(libraryId, sbomId),
@@ -42,6 +54,7 @@ async function testDependencies() {
   } finally {
     process.exit(0);
   }
+  console.log("\n--- IMPACT ANALYSIS ---");
 }
 
 testDependencies();
