@@ -51,6 +51,7 @@ export async function analyzeComponent(
   );
 
   return {
+    sbomId,
     component: {
       id: componentId,
       name,
