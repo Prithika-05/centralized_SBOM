@@ -3,6 +3,7 @@ import { analyzeComponent } from "./analysisService.js";
 
 export interface SecurityReport {
   generatedAt: string;
+  sbomId: string;
   component: {
     id: string;
     name: string;
@@ -28,6 +29,7 @@ export async function generateSecurityReport(
 
   return {
     generatedAt: new Date().toISOString(),
+    sbomId,
     component: analysis.component,
     vulnerabilityAnalysis: analysis.vulnerabilityAnalysis,
     impactAnalysis: analysis.impactAnalysis,
