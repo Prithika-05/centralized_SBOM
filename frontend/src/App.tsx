@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, UploadCloud, FileJson, CheckCircle2, AlertCircle, ShieldAlert} from "lucide-react";
+import { Terminal, UploadCloud, FileJson, CheckCircle2, AlertCircle, ShieldAlert } from "lucide-react";
 import { normalizeSeverity } from "./utils/severity";
-import "./App.css"; 
+import "./App.css";
 
 function App() {
   const [file, setFile] = useState<File | null>(null);
@@ -105,7 +105,7 @@ function App() {
         "http://localhost:5000/api/sboms/upload",
         { method: "POST", body: formData }
       );
-      
+
       const data: unknown = await response.json();
 
       if (response.ok && typeof data === "object" && data !== null) {
@@ -146,15 +146,15 @@ function App() {
 
     try {
       if (!sbomId) {
-  setAnalysisMessage("SBOM ID is missing. Please upload the SBOM again.");
-  return;
-}
+        setAnalysisMessage("SBOM ID is missing. Please upload the SBOM again.");
+        return;
+      }
 
-const params = new URLSearchParams({
-  name: packageName.trim(),
-  version: packageVersion.trim(),
-  sbomId: sbomId,
-});
+      const params = new URLSearchParams({
+        name: packageName.trim(),
+        version: packageVersion.trim(),
+        sbomId: sbomId,
+      });
 
       const response = await fetch(
         `http://localhost:5000/api/components/${encodeURIComponent(
@@ -182,70 +182,70 @@ const params = new URLSearchParams({
   }
 
 
-async function handleGenerateReport() {
-  if (!componentId.trim() || !packageName.trim() || !packageVersion.trim()) {
-    setReportMessage("Please enter all component details.");
-    return;
-  }
-
-  if (!sbomId) {
-    setReportMessage("SBOM ID is missing. Please upload the SBOM again.");
-    return;
-  }
-
-  setReportLoading(true);
-  setReportMessage("");
-  setReportResult(null);
-
-  try {
-    const params = new URLSearchParams({
-      name: packageName.trim(),
-      version: packageVersion.trim(),
-      sbomId: sbomId,
-    });
-
-    const response = await fetch(
-      `http://localhost:5000/api/components/${encodeURIComponent(
-        componentId.trim()
-      )}/report?${params.toString()}`
-    );
-
-    const data: unknown = await response.json();
-
-    if (!response.ok) {
-      setReportMessage("Report generation failed.");
-      setReportResult(data);
+  async function handleGenerateReport() {
+    if (!componentId.trim() || !packageName.trim() || !packageVersion.trim()) {
+      setReportMessage("Please enter all component details.");
       return;
     }
 
-    setReportResult(data);
+    if (!sbomId) {
+      setReportMessage("SBOM ID is missing. Please upload the SBOM again.");
+      return;
+    }
 
-    const blob = new Blob(
-      [JSON.stringify(data, null, 2)],
-      { type: "application/json" }
-    );
+    setReportLoading(true);
+    setReportMessage("");
+    setReportResult(null);
 
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    try {
+      const params = new URLSearchParams({
+        name: packageName.trim(),
+        version: packageVersion.trim(),
+        sbomId: sbomId,
+      });
 
-    link.href = downloadUrl;
-    link.download = `${packageName.trim()}-${packageVersion.trim()}-security-report.json`;
+      const response = await fetch(
+        `http://localhost:5000/api/components/${encodeURIComponent(
+          componentId.trim()
+        )}/report?${params.toString()}`
+      );
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const data: unknown = await response.json();
 
-    window.URL.revokeObjectURL(downloadUrl);
+      if (!response.ok) {
+        setReportMessage("Report generation failed.");
+        setReportResult(data);
+        return;
+      }
 
-    setReportMessage("Security report generated and downloaded successfully.");
-  } catch {
-    setReportMessage("Could not connect to the backend.");
-  } finally {
-    setReportLoading(false);
+      setReportResult(data);
+
+      const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+      );
+
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = downloadUrl;
+      link.download = `${packageName.trim()}-${packageVersion.trim()}-security-report.json`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(downloadUrl);
+
+      setReportMessage("Security report generated and downloaded successfully.");
+    } catch {
+      setReportMessage("Could not connect to the backend.");
+    } finally {
+      setReportLoading(false);
+    }
   }
-}
 
-  
+
   function getAnalysisSection(key: string): Record<string, any> | null {
     if (
       typeof analysisResult !== "object" ||
@@ -367,13 +367,13 @@ async function handleGenerateReport() {
   return (
     // CENTERED LAYOUT CONTAINER
     <div className="min-h-screen w-full flex items-start justify-center px-4 py-8 sm:px-6 lg:px-8 relative">
-      
+
       {/* Ambient Glow Effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-green-500/5 rounded-full blur-[100px] pointer-events-none" />
-      
+
       {/* MAIN FORM CARD */}
       <main className="w-full max-w-6xl relative z-10 space-y-6">
-        
+
         {/* Header / Title Block */}
         <div className="text-center space-y-2 mb-6">
           <div className="inline-flex items-center justify-center gap-2 mb-2">
@@ -404,7 +404,7 @@ async function handleGenerateReport() {
               </div>
             </div>
           </CardHeader>
-          
+
           <CardContent className="pt-6 space-y-5">
             <div className="space-y-2">
               <label htmlFor="sbom-file" className="text-xs font-bold text-green-500 uppercase tracking-wider flex items-center gap-2">
@@ -431,8 +431,8 @@ async function handleGenerateReport() {
               )}
             </div>
 
-            <Button 
-              onClick={handleUpload} 
+            <Button
+              onClick={handleUpload}
               disabled={loading || !file}
               className="w-full bg-green-600 hover:bg-green-500 text-black font-bold shadow-[0_0_15px_-3px_rgba(34,197,94,0.4)] hover:shadow-[0_0_20px_-3px_rgba(34,197,94,0.6)] transition-all duration-300 border-0 h-9 text-sm uppercase tracking-wider"
             >
@@ -450,17 +450,16 @@ async function handleGenerateReport() {
             </Button>
 
             {message && (
-              <Alert 
-                variant={isSuccess ? "default" : "destructive"} 
-                className={`${
-                  isSuccess ? "bg-green-950/20 text-green-400 border-green-500/30" : "bg-red-950/20 text-red-400 border-red-500/30"
-                } backdrop-blur-sm py-3`}
+              <Alert
+                variant={isSuccess ? "default" : "destructive"}
+                className={`${isSuccess ? "bg-green-950/20 text-green-400 border-green-500/30" : "bg-red-950/20 text-red-400 border-red-500/30"
+                  } backdrop-blur-sm py-3`}
               >
                 {isSuccess ? <CheckCircle2 className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
                 <AlertTitle className="text-xs font-bold uppercase">{isSuccess ? "Success" : "Error"}</AlertTitle>
                 <AlertDescription className="text-xs mt-0.5 font-mono opacity-90">{message}</AlertDescription>
               </Alert>
-            )}            
+            )}
             {isSuccess && result !== null && (
               <div className="rounded-lg border border-green-500/20 bg-green-950/10 p-4 space-y-3">
 
@@ -541,80 +540,80 @@ async function handleGenerateReport() {
           </CardHeader>
 
           <CardContent className="pt-6 space-y-4">
-            
-{isSuccess && (
-  <div className="space-y-2">
-    <label
-      htmlFor="componentSelect"
-      className="text-xs font-bold text-cyan-500 uppercase tracking-wider"
-    >
-      Select Component
-    </label>
 
-    <select
-      id="componentSelect"
-      value={componentId}
-      onChange={(event) => handleComponentSelect(event.target.value)}
-      className="w-full h-10 rounded-md bg-black/50 border border-cyan-500/20 px-3 text-sm text-cyan-300 focus:border-cyan-400 focus:outline-none"
-    >
-      <option value="">Choose a component from the uploaded SBOM</option>
+            {isSuccess && (
+              <div className="space-y-2">
+                <label
+                  htmlFor="componentSelect"
+                  className="text-xs font-bold text-cyan-500 uppercase tracking-wider"
+                >
+                  Select Component
+                </label>
 
-      {getUploadedComponents().map((component) => (
-        <option key={component.id} value={component.id}>
-          {component.name} — {component.version}
-        </option>
-      ))}
-    </select>
+                <select
+                  id="componentSelect"
+                  value={componentId}
+                  onChange={(event) => handleComponentSelect(event.target.value)}
+                  className="w-full h-10 rounded-md bg-black/50 border border-cyan-500/20 px-3 text-sm text-cyan-300 focus:border-cyan-400 focus:outline-none"
+                >
+                  <option value="">Choose a component from the uploaded SBOM</option>
 
-    <p className="text-xs text-cyan-600/70">
-      Select a component to automatically populate its details.
-    </p>
-          </div>
-          )}
+                  {getUploadedComponents().map((component) => (
+                    <option key={component.id} value={component.id}>
+                      {component.name} — {component.version}
+                    </option>
+                  ))}
+                </select>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-cyan-500 uppercase tracking-wider">
-              Component ID
-            </label>
-
-            <Input
-              value={componentId}
-              readOnly
-              placeholder="Select a component above"
-              className="bg-black/50 border-cyan-500/20 text-cyan-300 font-mono text-sm"
-            />
-            <p className="text-xs text-cyan-600/70">
-              Automatically populated from the normalized SBOM.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-cyan-500 uppercase tracking-wider">
-                Package
-              </label>
-
-              <Input
-                value={packageName}
-                readOnly
-                placeholder="Package name"
-                className="bg-black/50 border-cyan-500/20 text-cyan-300 font-mono text-sm"
-              />
-            </div>
+                <p className="text-xs text-cyan-600/70">
+                  Select a component to automatically populate its details.
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-cyan-500 uppercase tracking-wider">
-                Version
+                Component ID
               </label>
 
               <Input
-                value={packageVersion}
+                value={componentId}
                 readOnly
-                placeholder="Package version"
+                placeholder="Select a component above"
                 className="bg-black/50 border-cyan-500/20 text-cyan-300 font-mono text-sm"
               />
+              <p className="text-xs text-cyan-600/70">
+                Automatically populated from the normalized SBOM.
+              </p>
             </div>
-          </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-cyan-500 uppercase tracking-wider">
+                  Package
+                </label>
+
+                <Input
+                  value={packageName}
+                  readOnly
+                  placeholder="Package name"
+                  className="bg-black/50 border-cyan-500/20 text-cyan-300 font-mono text-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-cyan-500 uppercase tracking-wider">
+                  Version
+                </label>
+
+                <Input
+                  value={packageVersion}
+                  readOnly
+                  placeholder="Package version"
+                  className="bg-black/50 border-cyan-500/20 text-cyan-300 font-mono text-sm"
+                />
+              </div>
+            </div>
             <Button
               onClick={handleAnalyze}
               disabled={analysisLoading}
@@ -775,39 +774,39 @@ async function handleGenerateReport() {
                             )}
 
                             {vulnerability.matchedCPE && (
-                            <div className="cpe-evidence">
-                              <strong>CPE Matching Evidence</strong>
+                              <div className="cpe-evidence">
+                                <strong>CPE Matching Evidence</strong>
 
-                              <p>Matched CPE: {vulnerability.matchedCPE}</p>
+                                <p>Matched CPE: {vulnerability.matchedCPE}</p>
 
-                              {vulnerability.matchedVersionRange && (
-                                <div>
-                                  <p>
-                                    Start including:{" "}
-                                    {vulnerability.matchedVersionRange.startIncluding ?? "Not specified"}
-                                  </p>
+                                {vulnerability.matchedVersionRange && (
+                                  <div>
+                                    <p>
+                                      Start including:{" "}
+                                      {vulnerability.matchedVersionRange.startIncluding ?? "Not specified"}
+                                    </p>
 
-                                  <p>
-                                    Start excluding:{" "}
-                                    {vulnerability.matchedVersionRange.startExcluding ?? "Not specified"}
-                                  </p>
+                                    <p>
+                                      Start excluding:{" "}
+                                      {vulnerability.matchedVersionRange.startExcluding ?? "Not specified"}
+                                    </p>
 
-                                  <p>
-                                    End including:{" "}
-                                    {vulnerability.matchedVersionRange.endIncluding ?? "Not specified"}
-                                  </p>
+                                    <p>
+                                      End including:{" "}
+                                      {vulnerability.matchedVersionRange.endIncluding ?? "Not specified"}
+                                    </p>
 
-                                  <p>
-                                    End excluding:{" "}
-                                    {vulnerability.matchedVersionRange.endExcluding ?? "Not specified"}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                                    <p>
+                                      End excluding:{" "}
+                                      {vulnerability.matchedVersionRange.endExcluding ?? "Not specified"}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         ))}
-                     <h4>NVD Findings</h4>
+                      <h4>NVD Findings</h4>
                       {renderVulnerabilityList("nvd")}
 
                       <p className="text-sm text-muted-foreground">
@@ -865,65 +864,90 @@ async function handleGenerateReport() {
                           </p>
 
                           <div className="space-y-3">
-                            {results.map((item: any) => (
-                              <div
-                                key={item.ruleId}
-                                className="vulnerability-item"
-                              >
-                                <div className="flex items-center justify-between gap-2">
-                                  <strong>
-                                    {item.ruleId}: {item.ruleName}
-                                  </strong>
 
-                                  <span
-                                    className={
-                                      item.passed
-                                        ? "text-green-400 font-semibold"
-                                        : "text-red-400 font-semibold"
-                                    }
-                                  >
-                                    {item.passed ? "PASSED" : "FAILED"}
-                                  </span>
+                            {results.map((item: any) => {
+                              const isWarning =
+                                item.passed && Boolean(item.failureReason);
+
+                              return (
+                                <div
+                                  key={item.ruleId}
+                                  className="vulnerability-item"
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <strong>
+                                      {item.ruleId}: {item.ruleName}
+                                    </strong>
+
+                                    <span
+                                      className={
+                                        isWarning
+                                          ? "text-yellow-400 font-semibold"
+                                          : item.passed
+                                            ? "text-green-400 font-semibold"
+                                            : "text-red-400 font-semibold"
+                                      }
+                                    >
+                                      {isWarning
+                                        ? "WARNING"
+                                        : item.passed
+                                          ? "PASSED"
+                                          : "FAILED"}
+                                    </span>
+                                  </div>
+
+                                  <p>{item.message}</p>
+
+                                  <div className="mt-2 space-y-2 text-sm">
+                                    <p>
+                                      <strong>Expected:</strong>{" "}
+                                      {item.expected ?? "Not provided"}
+                                    </p>
+
+                                    <p>
+                                      <strong>Actual:</strong>{" "}
+                                      {item.actual ?? "Not provided"}
+                                    </p>
+
+                                    {(!item.passed || isWarning) && (
+                                      <div
+                                        className={
+                                          isWarning
+                                            ? "rounded border border-yellow-500/30 bg-yellow-950/20 p-3 space-y-2"
+                                            : "rounded border border-red-500/30 bg-red-950/20 p-3 space-y-2"
+                                        }
+                                      >
+                                        <p
+                                          className={
+                                            isWarning
+                                              ? "text-yellow-400 font-semibold"
+                                              : "text-red-400 font-semibold"
+                                          }
+                                        >
+                                          {isWarning ? "Warning details" : "Failure reason"}
+                                        </p>
+
+                                        <p>
+                                          {item.failureReason ??
+                                            item.message ??
+                                            "No additional details provided."}
+                                        </p>
+
+                                        <p className="text-cyan-400 font-semibold">
+                                          Suggested action
+                                        </p>
+
+                                        <p>
+                                          {item.suggestedAction ??
+                                            "Check the backend logs and the corresponding validation rule."}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
+                              );
+                            })}
 
-                                <p>{item.message}</p>
-
-                                <div className="mt-2 space-y-2 text-sm">
-                                  <p>
-                                    <strong>Expected:</strong>{" "}
-                                    {item.expected ?? "Not provided"}
-                                  </p>
-
-                                  <p>
-                                    <strong>Actual:</strong>{" "}
-                                    {item.actual ?? "Not provided"}
-                                  </p>
-
-                                  {!item.passed && (
-                                    <div className="rounded border border-red-500/30 bg-red-950/20 p-3 space-y-2">
-                                      <p className="text-red-400 font-semibold">
-                                        Failure reason
-                                      </p>
-
-                                      <p>
-                                        {item.failureReason ??
-                                          item.message ??
-                                          "No failure details provided by the backend."}
-                                      </p>
-
-                                      <p className="text-cyan-400 font-semibold">
-                                        Suggested action
-                                      </p>
-
-                                      <p>
-                                        {item.suggestedAction ??
-                                          "Check the backend logs and the corresponding validation rule."}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
                           </div>
                         </div>
                       );
