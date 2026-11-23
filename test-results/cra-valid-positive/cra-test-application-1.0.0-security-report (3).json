@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-11-23T10:15:20.819Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:182",
+  "component": {
+    "id": "cra-test-application@1.0.0",
+    "name": "cra-test-application",
+    "version": "1.0.0"
+  },
+  "vulnerabilityAnalysis": {
+    "componentId": "cra-test-application@1.0.0",
+    "name": "cra-test-application",
+    "version": "1.0.0",
+    "vulnerabilities": {
+      "nvd": [],
+      "osv": []
+    },
+    "severity": "UNKNOWN",
+    "unifiedVulnerabilities": []
+  },
+  "impactAnalysis": {
+    "impactedComponents": []
+  },
+  "craValidation": {
+    "compliant": true,
+    "results": [
+      {
+        "ruleId": "CRA-001",
+        "ruleName": "SBOM Available",
+        "passed": true,
+        "message": "SBOM is available.",
+        "expected": "A valid SBOM should be available.",
+        "actual": "A valid SBOM is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-002",
+        "ruleName": "Vulnerability Detection",
+        "passed": true,
+        "message": "Vulnerability analysis completed; 0 findings recorded.",
+        "expected": "Vulnerability analysis should complete successfully and return a valid non-negative finding count.",
+        "actual": "Analysis completed: true. Finding count: 0.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-003",
+        "ruleName": "Dependency Analysis",
+        "passed": true,
+        "message": "Dependency information is available.",
+        "expected": "Dependency relationships should be available for the SBOM components.",
+        "actual": "Dependency information is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-004",
+        "ruleName": "Vulnerability Impact Analysis",
+        "passed": true,
+        "message": "Vulnerability impact analysis is available.",
+        "expected": "Vulnerability impact analysis should complete and return a valid result.",
+        "actual": "Impact analysis is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-005",
+        "ruleName": "Component Metadata Validation",
+        "passed": true,
+        "message": "Component metadata is valid.",
+        "expected": "Component name and version should be available and valid.",
+        "actual": "Name: cra-test-application. Version: 1.0.0.",
+        "failureReason": null,
+        "suggestedAction": null
+      }
+    ]
+  }
+}

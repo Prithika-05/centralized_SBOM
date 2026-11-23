@@ -1,3 +1,4 @@
+
 export interface CRARule {
   id: string;
   name: string;
@@ -24,6 +25,11 @@ export const craRules: CRARule[] = [
     id: "CRA-004",
     name: "Vulnerability Impact Analysis",
     description: "The impact of identified vulnerabilities should be assessable.",
+  },
+  {
+    id: "CRA-005",
+    name: "Component Metadata Validation",
+    description: "Components should have valid names and version information.",
   },
 ];
 

@@ -1,0 +1,84 @@
+{
+  "generatedAt": "2026-11-23T10:05:23.102Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:177",
+  "component": {
+    "id": "test-library@Unknown",
+    "name": "test-library",
+    "version": "Unknown"
+  },
+  "vulnerabilityAnalysis": {
+    "componentId": "test-library@Unknown",
+    "name": "test-library",
+    "version": "Unknown",
+    "vulnerabilities": {
+      "nvd": [],
+      "osv": []
+    },
+    "severity": "UNKNOWN",
+    "unifiedVulnerabilities": []
+  },
+  "impactAnalysis": {
+    "impactedComponents": [
+      {
+        "id": "cra-test-application@1.0.0",
+        "name": "cra-test-application",
+        "version": "1.0.0"
+      }
+    ]
+  },
+  "craValidation": {
+    "compliant": false,
+    "results": [
+      {
+        "ruleId": "CRA-001",
+        "ruleName": "SBOM Available",
+        "passed": true,
+        "message": "SBOM is available.",
+        "expected": "A valid SBOM should be available.",
+        "actual": "A valid SBOM is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-002",
+        "ruleName": "Vulnerability Detection",
+        "passed": true,
+        "message": "Vulnerability analysis completed; 0 findings recorded.",
+        "expected": "Vulnerability analysis should complete successfully and return a valid non-negative finding count.",
+        "actual": "Analysis completed: true. Finding count: 0.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-003",
+        "ruleName": "Dependency Analysis",
+        "passed": true,
+        "message": "Dependency information is available.",
+        "expected": "Dependency relationships should be available for the SBOM components.",
+        "actual": "Dependency information is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-004",
+        "ruleName": "Vulnerability Impact Analysis",
+        "passed": true,
+        "message": "Vulnerability impact analysis is available.",
+        "expected": "Vulnerability impact analysis should complete and return a valid result.",
+        "actual": "Impact analysis is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-005",
+        "ruleName": "Component Metadata Validation",
+        "passed": false,
+        "message": "Component metadata is missing or invalid.",
+        "expected": "Component name and version should be available and valid.",
+        "actual": "Name: test-library. Version: Unknown.",
+        "failureReason": "Component version is missing or invalid.",
+        "suggestedAction": "Provide a valid component name and version in the SBOM."
+      }
+    ]
+  }
+}

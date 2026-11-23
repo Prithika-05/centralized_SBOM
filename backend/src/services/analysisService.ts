@@ -47,7 +47,9 @@ export async function analyzeComponent(
     vulnerabilityAnalysisCompleted,
     vulnerabilityCount,
     hasDependencies,
-    hasImpactAnalysis
+    hasImpactAnalysis,
+    name,
+    version
   );
 
   return {

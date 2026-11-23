@@ -22,7 +22,9 @@ export function validateCRA(
   vulnerabilityAnalysisCompleted: boolean,
   vulnerabilityCount: number,
   hasDependencies: boolean,
-  hasImpactAnalysis: boolean
+  hasImpactAnalysis: boolean,
+  componentName: string,
+  componentVersion: string
 ): CRAValidationSummary {
   const rules: CRARule[] = getCRARules();
 
@@ -139,7 +141,43 @@ export function validateCRA(
         suggestedAction =
           "Add the corresponding validation logic to craValidationService.ts.";
         break;
+              case "CRA-005": {
+        const validName =
+          typeof componentName === "string" &&
+          componentName.trim() !== "" &&
+          componentName.trim().toLowerCase() !== "unknown";
+
+        const validVersion =
+          typeof componentVersion === "string" &&
+          componentVersion.trim() !== "" &&
+          componentVersion.trim().toLowerCase() !== "unknown";
+
+        passed = validName && validVersion;
+
+        expected =
+          "Component name and version should be available and valid.";
+
+        actual =
+          `Name: ${componentName || "Missing"}. Version: ${componentVersion || "Missing"}.`;
+
+        message = passed
+          ? "Component metadata is valid."
+          : "Component metadata is missing or invalid.";
+
+        if (!passed) {
+          failureReason = !validName && !validVersion
+            ? "Component name and version are missing or invalid."
+            : !validName
+              ? "Component name is missing or invalid."
+              : "Component version is missing or invalid.";
+
+          suggestedAction =
+            "Provide a valid component name and version in the SBOM.";
+        }
+        break;
+      }
     }
+    
 
     return {
       ruleId: rule.id,
