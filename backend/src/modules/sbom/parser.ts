@@ -53,6 +53,10 @@ export function parseCycloneDX(data: any): ParsedSBOM {
       licenses,
       hashes,
     };
+    console.log("RAW COMPONENT SUPPLIER:", {
+      componentName: component.name,
+      supplier: component.supplier,
+    });
 
     components.push(parsedComponent);
 
@@ -61,12 +65,12 @@ export function parseCycloneDX(data: any): ParsedSBOM {
       componentMap.set(component["bom-ref"], parsedComponent);
     }
 
-console.log(
-  "REFERENCE REGISTERED:",
-  component["bom-ref"],
-  "->",
-  componentMap.get(component["bom-ref"])?.name
-);
+    console.log(
+      "REFERENCE REGISTERED:",
+      component["bom-ref"],
+      "->",
+      componentMap.get(component["bom-ref"])?.name
+    );
     // Register the canonical name@version only if it is not already used.
     const canonicalRef = `${component.name}@${component.version}`;
 
@@ -99,15 +103,15 @@ console.log(
   }
 
   console.log(
-  "REGISTERED COMPONENT REFERENCES:",
-  Array.from(componentMap.keys())
-);
+    "REGISTERED COMPONENT REFERENCES:",
+    Array.from(componentMap.keys())
+  );
 
   console.log(
-  "ROOT COMPONENT:",
-  components[0]?.name,
-  components[0]?.version
-);
+    "ROOT COMPONENT:",
+    components[0]?.name,
+    components[0]?.version
+  );
   // 3. Process top-level dependency relationships.
   if (Array.isArray(data.dependencies)) {
     for (const dependency of data.dependencies) {
@@ -132,14 +136,14 @@ console.log(
         }
 
         console.log("DEPENDENCY OBJECT CHECK:", {
-  sourceName: source.name,
-  sourceVersion: source.version,
-  targetName: targetComponent.name,
-  targetVersion: targetComponent.version,
-  sameObject: source === targetComponent,
-  sourcePackageId: source.packageId,
-  targetPackageId: targetComponent.packageId,
-});
+          sourceName: source.name,
+          sourceVersion: source.version,
+          targetName: targetComponent.name,
+          targetVersion: targetComponent.version,
+          sameObject: source === targetComponent,
+          sourcePackageId: source.packageId,
+          targetPackageId: targetComponent.packageId,
+        });
 
         // Prevent a component from depending on itself.
         if (source === targetComponent) {
