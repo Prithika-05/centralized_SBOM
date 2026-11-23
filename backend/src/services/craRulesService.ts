@@ -31,6 +31,12 @@ export const craRules: CRARule[] = [
     name: "Component Metadata Validation",
     description: "Components should have valid names and version information.",
   },
+  {
+    id: "CRA-006",
+    name: "Supplier Metadata Validation",
+    description:
+      "Supplier information should be available to support component identification and traceability.",
+  },
 ];
 
 export function getCRARules(): CRARule[] {

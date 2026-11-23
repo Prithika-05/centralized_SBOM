@@ -108,3 +108,46 @@ export async function hasValidatedSBOM(
     await session.close();
   }
 }
+
+
+export async function getComponentMetadata(
+  componentId: string,
+  sbomId: string
+): Promise<{
+  name: string | null;
+  version: string | null;
+  supplier: string | null;
+} | null> {
+  const session = neo4jDriver.session();
+
+  try {
+    const result = await session.executeRead(async (tx) => {
+      return tx.run(
+        `
+        MATCH (s:SBOM)-[:CONTAINS]->(c:Component {id: $componentId})
+        WHERE elementId(s) = $sbomId
+        RETURN
+          c.name AS name,
+          c.version AS version,
+          c.supplier AS supplier
+        LIMIT 1
+        `,
+        { componentId, sbomId }
+      );
+    });
+
+    if (result.records.length === 0) {
+      return null;
+    }
+
+    const record = result.records[0];
+
+    return {
+      name: record.get("name") ?? null,
+      version: record.get("version") ?? null,
+      supplier: record.get("supplier") ?? null,
+    };
+  } finally {
+    await session.close();
+  }
+}

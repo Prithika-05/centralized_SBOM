@@ -24,7 +24,8 @@ export function validateCRA(
   hasDependencies: boolean,
   hasImpactAnalysis: boolean,
   componentName: string,
-  componentVersion: string
+  componentVersion: string,
+  componentSupplier: string
 ): CRAValidationSummary {
   const rules: CRARule[] = getCRARules();
 
@@ -141,7 +142,7 @@ export function validateCRA(
         suggestedAction =
           "Add the corresponding validation logic to craValidationService.ts.";
         break;
-              case "CRA-005": {
+      case "CRA-005": {
         const validName =
           typeof componentName === "string" &&
           componentName.trim() !== "" &&
@@ -175,9 +176,37 @@ export function validateCRA(
             "Provide a valid component name and version in the SBOM.";
         }
         break;
+
+      }
+      case "CRA-006": {
+        const validSupplier =
+          typeof componentSupplier === "string" &&
+          componentSupplier.trim() !== "" &&
+          componentSupplier.trim().toLowerCase() !== "unknown";
+
+        // Missing supplier is a warning, not a compliance failure.
+        passed = true;
+
+        expected = "Supplier information should be provided for component traceability.";
+
+        actual = validSupplier
+          ? `Supplier: ${componentSupplier}.`
+          : "Supplier information is missing.";
+
+        message = validSupplier
+          ? "Supplier metadata is available."
+          : "Warning: Supplier metadata is missing.";
+
+        if (!validSupplier) {
+          failureReason = "Supplier information is not available.";
+          suggestedAction =
+            "Add supplier information to the component in the SPDX or CycloneDX SBOM where available.";
+        }
+
+        break;
       }
     }
-    
+
 
     return {
       ruleId: rule.id,
