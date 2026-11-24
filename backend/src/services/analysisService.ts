@@ -39,7 +39,8 @@ export async function analyzeComponent(
     sbomId
   );
 
-  const hasImpactAnalysis = Array.isArray(impactedComponents);
+  const hasImpactAnalysis =
+  hasDependencies && Array.isArray(impactedComponents);
   const vulnerabilityAnalysisCompleted = !!vulnerabilityAnalysis;
   const hasSBOM = await hasValidatedSBOM(componentId, sbomId);
   const componentMetadata = await getComponentMetadata(

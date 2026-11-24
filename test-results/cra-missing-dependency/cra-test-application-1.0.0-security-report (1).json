@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-24T13:47:19.632Z",
-  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:199",
+  "generatedAt": "2026-11-24T14:00:16.706Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:200",
   "component": {
     "id": "cra-test-application@1.0.0",
     "name": "cra-test-application",
@@ -57,12 +57,12 @@
       {
         "ruleId": "CRA-004",
         "ruleName": "Vulnerability Impact Analysis",
-        "passed": true,
-        "message": "Vulnerability impact analysis is available.",
+        "passed": false,
+        "message": "Vulnerability impact analysis is missing.",
         "expected": "Vulnerability impact analysis should complete and return a valid result.",
-        "actual": "Impact analysis is available.",
-        "failureReason": null,
-        "suggestedAction": null
+        "actual": "Impact analysis is unavailable.",
+        "failureReason": "The system could not confirm that vulnerability impact analysis completed successfully.",
+        "suggestedAction": "Check the impact analysis service, component identifiers, dependency relationships, and backend logs."
       },
       {
         "ruleId": "CRA-005",

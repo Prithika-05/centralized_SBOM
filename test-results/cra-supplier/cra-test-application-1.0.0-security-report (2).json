@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-23T21:32:04.844Z",
-  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:193",
+  "generatedAt": "2026-11-24T14:06:09.505Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:202",
   "component": {
     "id": "cra-test-application@1.0.0",
     "name": "cra-test-application",

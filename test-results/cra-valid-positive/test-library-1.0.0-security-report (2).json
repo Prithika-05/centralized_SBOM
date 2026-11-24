@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-24T13:43:39.488Z",
-  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:198",
+  "generatedAt": "2026-11-24T14:03:49.203Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:201",
   "component": {
-    "id": "cra-test-application@1.0.0",
-    "name": "cra-test-application",
+    "id": "test-library@1.0.0",
+    "name": "test-library",
     "version": "1.0.0",
     "supplier": null
   },
   "vulnerabilityAnalysis": {
-    "componentId": "cra-test-application@1.0.0",
-    "name": "cra-test-application",
+    "componentId": "test-library@1.0.0",
+    "name": "test-library",
     "version": "1.0.0",
     "vulnerabilities": {
       "nvd": [],
@@ -19,7 +19,13 @@
     "unifiedVulnerabilities": []
   },
   "impactAnalysis": {
-    "impactedComponents": []
+    "impactedComponents": [
+      {
+        "id": "cra-test-application@1.0.0",
+        "name": "cra-test-application",
+        "version": "1.0.0"
+      }
+    ]
   },
   "craValidation": {
     "compliant": true,
@@ -70,7 +76,7 @@
         "passed": true,
         "message": "Component metadata is valid.",
         "expected": "Component name and version should be available and valid.",
-        "actual": "Name: cra-test-application. Version: 1.0.0.",
+        "actual": "Name: test-library. Version: 1.0.0.",
         "failureReason": null,
         "suggestedAction": null
       },

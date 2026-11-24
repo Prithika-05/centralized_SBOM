@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-23T21:30:43.716Z",
-  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:193",
+  "generatedAt": "2026-11-24T14:06:16.641Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:202",
   "component": {
     "id": "test-library@1.0.0",
     "name": "test-library",

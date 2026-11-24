@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-24T13:48:17.757Z",
-  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:199",
+  "generatedAt": "2026-11-24T14:03:41.142Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:201",
   "component": {
-    "id": "test-library@1.0.0",
-    "name": "test-library",
+    "id": "cra-test-application@1.0.0",
+    "name": "cra-test-application",
     "version": "1.0.0",
     "supplier": null
   },
   "vulnerabilityAnalysis": {
-    "componentId": "test-library@1.0.0",
-    "name": "test-library",
+    "componentId": "cra-test-application@1.0.0",
+    "name": "cra-test-application",
     "version": "1.0.0",
     "vulnerabilities": {
       "nvd": [],
@@ -22,7 +22,7 @@
     "impactedComponents": []
   },
   "craValidation": {
-    "compliant": false,
+    "compliant": true,
     "results": [
       {
         "ruleId": "CRA-001",
@@ -47,12 +47,12 @@
       {
         "ruleId": "CRA-003",
         "ruleName": "Dependency Analysis",
-        "passed": false,
-        "message": "Dependency information is missing.",
+        "passed": true,
+        "message": "Dependency information is available.",
         "expected": "Dependency relationships should be available for the SBOM components.",
-        "actual": "No dependency relationships were detected.",
-        "failureReason": "The system could not find dependency relationships in the SBOM graph.",
-        "suggestedAction": "Check the SBOM dependencies section, verify that dependency references match component identifiers, and confirm that relationships were stored in Neo4j."
+        "actual": "Dependency information is available.",
+        "failureReason": null,
+        "suggestedAction": null
       },
       {
         "ruleId": "CRA-004",
@@ -70,7 +70,7 @@
         "passed": true,
         "message": "Component metadata is valid.",
         "expected": "Component name and version should be available and valid.",
-        "actual": "Name: test-library. Version: 1.0.0.",
+        "actual": "Name: cra-test-application. Version: 1.0.0.",
         "failureReason": null,
         "suggestedAction": null
       },
