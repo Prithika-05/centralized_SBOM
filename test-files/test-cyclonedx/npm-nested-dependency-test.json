@@ -1,0 +1,46 @@
+
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "name": "npm-nested-test-application",
+      "version": "1.0.0",
+      "purl": "pkg:npm/npm-nested-test-application@1.0.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "parent-package",
+      "version": "1.0.0",
+      "purl": "pkg:npm/parent-package@1.0.0"
+    },
+    {
+      "type": "library",
+      "name": "lodash",
+      "version": "4.17.20",
+      "purl": "pkg:npm/lodash@4.17.20"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:npm/npm-nested-test-application@1.0.0",
+      "dependsOn": [
+        "pkg:npm/parent-package@1.0.0"
+      ]
+    },
+    {
+      "ref": "pkg:npm/parent-package@1.0.0",
+      "dependsOn": [
+        "pkg:npm/lodash@4.17.20"
+      ]
+    },
+    {
+      "ref": "pkg:npm/lodash@4.17.20",
+      "dependsOn": []
+    }
+  ]
+}

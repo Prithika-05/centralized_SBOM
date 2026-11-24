@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-11-24T14:55:47.994Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:211",
+  "component": {
+    "id": "pkg:npm/parent-package@1.0.0",
+    "name": "parent-package",
+    "version": "1.0.0",
+    "supplier": null
+  },
+  "vulnerabilityAnalysis": {
+    "componentId": "pkg:npm/parent-package@1.0.0",
+    "name": "parent-package",
+    "version": "1.0.0",
+    "vulnerabilities": {
+      "nvd": [],
+      "osv": []
+    },
+    "severity": "UNKNOWN",
+    "unifiedVulnerabilities": []
+  },
+  "impactAnalysis": {
+    "impactedComponents": []
+  },
+  "craValidation": {
+    "compliant": false,
+    "results": [
+      {
+        "ruleId": "CRA-001",
+        "ruleName": "SBOM Available",
+        "passed": true,
+        "message": "SBOM is available.",
+        "expected": "A valid SBOM should be available.",
+        "actual": "A valid SBOM is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-002",
+        "ruleName": "Vulnerability Detection",
+        "passed": true,
+        "message": "Vulnerability analysis completed; 0 findings recorded.",
+        "expected": "Vulnerability analysis should complete successfully and return a valid non-negative finding count.",
+        "actual": "Analysis completed: true. Finding count: 0.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-003",
+        "ruleName": "Dependency Analysis",
+        "passed": false,
+        "message": "Dependency information is missing.",
+        "expected": "Dependency relationships should be available for the SBOM components.",
+        "actual": "No dependency relationships were detected.",
+        "failureReason": "The system could not find dependency relationships in the SBOM graph.",
+        "suggestedAction": "Check the SBOM dependencies section, verify that dependency references match component identifiers, and confirm that relationships were stored in Neo4j."
+      },
+      {
+        "ruleId": "CRA-004",
+        "ruleName": "Vulnerability Impact Analysis",
+        "passed": false,
+        "message": "Vulnerability impact analysis is missing.",
+        "expected": "Vulnerability impact analysis should complete and return a valid result.",
+        "actual": "Impact analysis is unavailable.",
+        "failureReason": "The system could not confirm that vulnerability impact analysis completed successfully.",
+        "suggestedAction": "Check the impact analysis service, component identifiers, dependency relationships, and backend logs."
+      },
+      {
+        "ruleId": "CRA-005",
+        "ruleName": "Component Metadata Validation",
+        "passed": true,
+        "message": "Component metadata is valid.",
+        "expected": "Component name and version should be available and valid.",
+        "actual": "Name: parent-package. Version: 1.0.0.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-006",
+        "ruleName": "Supplier Metadata Validation",
+        "passed": true,
+        "message": "Warning: Supplier metadata is missing.",
+        "expected": "Supplier information should be provided for component traceability.",
+        "actual": "Supplier information is missing.",
+        "failureReason": "Supplier information is not available.",
+        "suggestedAction": "Add supplier information to the component in the SPDX or CycloneDX SBOM where available."
+      }
+    ]
+  }
+}
