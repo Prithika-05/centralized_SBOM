@@ -57,8 +57,14 @@ export function parseCycloneDX(data: any): ParsedSBOM {
     components.push(parsedComponent);
 
     // Register the original CycloneDX bom-ref.
+    // Register the original CycloneDX bom-ref.
     if (component["bom-ref"]) {
       componentMap.set(component["bom-ref"], parsedComponent);
+    }
+
+    // Register the PURL so dependency references using PURLs resolve.
+    if (component.purl) {
+      componentMap.set(component.purl, parsedComponent);
     }
 
     // Register the canonical name@version only if it is not already used.
