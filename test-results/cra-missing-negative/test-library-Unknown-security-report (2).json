@@ -1,10 +1,11 @@
 {
-  "generatedAt": "2026-11-23T10:05:23.102Z",
-  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:177",
+  "generatedAt": "2026-11-24T13:41:31.074Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:197",
   "component": {
     "id": "test-library@Unknown",
     "name": "test-library",
-    "version": "Unknown"
+    "version": "Unknown",
+    "supplier": null
   },
   "vulnerabilityAnalysis": {
     "componentId": "test-library@Unknown",
@@ -78,6 +79,16 @@
         "actual": "Name: test-library. Version: Unknown.",
         "failureReason": "Component version is missing or invalid.",
         "suggestedAction": "Provide a valid component name and version in the SBOM."
+      },
+      {
+        "ruleId": "CRA-006",
+        "ruleName": "Supplier Metadata Validation",
+        "passed": true,
+        "message": "Warning: Supplier metadata is missing.",
+        "expected": "Supplier information should be provided for component traceability.",
+        "actual": "Supplier information is missing.",
+        "failureReason": "Supplier information is not available.",
+        "suggestedAction": "Add supplier information to the component in the SPDX or CycloneDX SBOM where available."
       }
     ]
   }

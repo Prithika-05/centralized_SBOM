@@ -1,0 +1,24 @@
+{
+    "bomFormat":  "CycloneDX",
+    "specVersion":  "1.5",
+    "version":  1,
+    "metadata":  {
+                     "component":  {
+                                       "type":  "application",
+                                       "name":  "cra-test-application",
+                                       "version":  "1.0.0",
+                                       "bom-ref":  "cra-test-application@1.0.0"
+                                   }
+                 },
+    "components":  [
+                       {
+                           "type":  "library",
+                           "name":  "test-library",
+                           "bom-ref":  "test-library",
+                           "version":  "1.0.0"
+                       }
+                   ],
+    "dependencies":  [
+
+                     ]
+}
