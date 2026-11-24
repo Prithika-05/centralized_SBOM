@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-24T14:06:16.641Z",
-  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:202",
+  "generatedAt": "2026-11-24T14:19:59.466Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:204",
   "component": {
-    "id": "test-library@1.0.0",
-    "name": "test-library",
+    "id": "pkg:npm/library-a@1.0.0",
+    "name": "library-a",
     "version": "1.0.0",
-    "supplier": "Apache Software Foundation"
+    "supplier": null
   },
   "vulnerabilityAnalysis": {
-    "componentId": "test-library@1.0.0",
-    "name": "test-library",
+    "componentId": "pkg:npm/library-a@1.0.0",
+    "name": "library-a",
     "version": "1.0.0",
     "vulnerabilities": {
       "nvd": [],
@@ -21,8 +21,8 @@
   "impactAnalysis": {
     "impactedComponents": [
       {
-        "id": "cra-test-application@1.0.0",
-        "name": "cra-test-application",
+        "id": "my-application@1.0.0",
+        "name": "my-application",
         "version": "1.0.0"
       }
     ]
@@ -76,7 +76,7 @@
         "passed": true,
         "message": "Component metadata is valid.",
         "expected": "Component name and version should be available and valid.",
-        "actual": "Name: test-library. Version: 1.0.0.",
+        "actual": "Name: library-a. Version: 1.0.0.",
         "failureReason": null,
         "suggestedAction": null
       },
@@ -84,11 +84,11 @@
         "ruleId": "CRA-006",
         "ruleName": "Supplier Metadata Validation",
         "passed": true,
-        "message": "Supplier metadata is available.",
+        "message": "Warning: Supplier metadata is missing.",
         "expected": "Supplier information should be provided for component traceability.",
-        "actual": "Supplier: Apache Software Foundation.",
-        "failureReason": null,
-        "suggestedAction": null
+        "actual": "Supplier information is missing.",
+        "failureReason": "Supplier information is not available.",
+        "suggestedAction": "Add supplier information to the component in the SPDX or CycloneDX SBOM where available."
       }
     ]
   }

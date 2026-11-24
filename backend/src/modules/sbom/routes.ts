@@ -28,18 +28,7 @@ router.post("/upload", upload.single("sbom"), async (req, res, next) => {
 
     // 2. Convert JSON text into an object
     const sbomData = JSON.parse(fileContent);
-    console.log("UPLOADED FILE:", req.file.originalname);
 
-console.log(
-  "RAW SBOM COMPONENT SUPPLIERS:",
-  JSON.stringify({
-    metadataSupplier: sbomData.metadata?.component?.supplier,
-    componentSuppliers: sbomData.components?.map((c: any) => ({
-      name: c.name,
-      supplier: c.supplier,
-    })),
-  }, null, 2)
-);
 
     // 3. Detect SBOM format
     const format = detectSBOMFormat(sbomData);
@@ -61,19 +50,7 @@ console.log(
     // 6. Normalize parsed SBOM
     const normalizedSBOM = normalizeSBOM(parsedSBOM);
 
-    console.log(
-      "PARSED SBOM COMPONENTS:",
-      JSON.stringify(parsedSBOM.components, null, 2)
-    );
-
-    console.log(
-      "NORMALIZED SBOM COMPONENTS:",
-      JSON.stringify(normalizedSBOM.components, null, 2)
-    );
-
     const sbomId = await storeSBOM(normalizedSBOM);
-
-    console.log("STORED SBOM ID:", sbomId);
 
     // 7. Return result
     res.json({

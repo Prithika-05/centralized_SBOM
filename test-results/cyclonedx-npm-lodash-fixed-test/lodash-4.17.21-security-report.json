@@ -1,0 +1,569 @@
+{
+  "generatedAt": "2026-11-24T14:23:52.423Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:205",
+  "component": {
+    "id": "pkg:npm/lodash@4.17.21",
+    "name": "lodash",
+    "version": "4.17.21",
+    "supplier": null
+  },
+  "vulnerabilityAnalysis": {
+    "componentId": "pkg:npm/lodash@4.17.21",
+    "name": "lodash",
+    "version": "4.17.21",
+    "vulnerabilities": {
+      "nvd": [],
+      "osv": [
+        {
+          "id": "GHSA-r5fr-rjxr-66jc",
+          "aliases": [
+            "CVE-2026-4800"
+          ],
+          "summary": "lodash vulnerable to Code Injection via `_.template` imports key names",
+          "severity": "HIGH",
+          "affected": [
+            {
+              "package": {
+                "name": "lodash",
+                "ecosystem": "npm",
+                "purl": "pkg:npm/lodash"
+              },
+              "ranges": [
+                {
+                  "type": "SEMVER",
+                  "events": [
+                    {
+                      "introduced": "4.0.0"
+                    },
+                    {
+                      "fixed": "4.18.0"
+                    }
+                  ]
+                }
+              ],
+              "database_specific": {
+                "last_known_affected_version_range": "<= 4.17.23",
+                "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-r5fr-rjxr-66jc/GHSA-r5fr-rjxr-66jc.json"
+              }
+            },
+            {
+              "package": {
+                "name": "lodash-es",
+                "ecosystem": "npm",
+                "purl": "pkg:npm/lodash-es"
+              },
+              "ranges": [
+                {
+                  "type": "SEMVER",
+                  "events": [
+                    {
+                      "introduced": "4.0.0"
+                    },
+                    {
+                      "fixed": "4.18.0"
+                    }
+                  ]
+                }
+              ],
+              "database_specific": {
+                "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-r5fr-rjxr-66jc/GHSA-r5fr-rjxr-66jc.json",
+                "last_known_affected_version_range": "<= 4.17.23"
+              }
+            },
+            {
+              "package": {
+                "name": "lodash-amd",
+                "ecosystem": "npm",
+                "purl": "pkg:npm/lodash-amd"
+              },
+              "ranges": [
+                {
+                  "type": "SEMVER",
+                  "events": [
+                    {
+                      "introduced": "4.0.0"
+                    },
+                    {
+                      "fixed": "4.18.0"
+                    }
+                  ]
+                }
+              ],
+              "database_specific": {
+                "last_known_affected_version_range": "<= 4.17.23",
+                "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-r5fr-rjxr-66jc/GHSA-r5fr-rjxr-66jc.json"
+              }
+            },
+            {
+              "package": {
+                "name": "lodash.template",
+                "ecosystem": "npm",
+                "purl": "pkg:npm/lodash.template"
+              },
+              "ranges": [
+                {
+                  "type": "SEMVER",
+                  "events": [
+                    {
+                      "introduced": "4.0.0"
+                    },
+                    {
+                      "fixed": "4.18.0"
+                    }
+                  ]
+                }
+              ],
+              "database_specific": {
+                "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-r5fr-rjxr-66jc/GHSA-r5fr-rjxr-66jc.json"
+              }
+            }
+          ]
+        },
+        {
+          "id": "GHSA-xxjr-mmjv-4gpg",
+          "aliases": [
+            "CVE-2025-13465"
+          ],
+          "summary": "Lodash has Prototype Pollution Vulnerability in `_.unset`, `_.omit`, and `_.pullAt` functions",
+          "severity": "MODERATE",
+          "affected": [
+            {
+              "package": {
+                "name": "lodash",
+                "ecosystem": "npm",
+                "purl": "pkg:npm/lodash"
+              },
+              "ranges": [
+                {
+                  "type": "SEMVER",
+                  "events": [
+                    {
+                      "introduced": "4.0.0"
+                    },
+                    {
+                      "fixed": "4.17.23"
+                    }
+                  ]
+                }
+              ],
+              "database_specific": {
+                "last_known_affected_version_range": "<= 4.17.22",
+                "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+              }
+            },
+            {
+              "package": {
+                "name": "lodash-amd",
+                "ecosystem": "npm",
+                "purl": "pkg:npm/lodash-amd"
+              },
+              "ranges": [
+                {
+                  "type": "SEMVER",
+                  "events": [
+                    {
+                      "introduced": "4.0.0"
+                    },
+                    {
+                      "fixed": "4.17.23"
+                    }
+                  ]
+                }
+              ],
+              "database_specific": {
+                "last_known_affected_version_range": "<= 4.17.22",
+                "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+              }
+            },
+            {
+              "package": {
+                "name": "lodash-es",
+                "ecosystem": "npm",
+                "purl": "pkg:npm/lodash-es"
+              },
+              "ranges": [
+                {
+                  "type": "SEMVER",
+                  "events": [
+                    {
+                      "introduced": "4.0.0"
+                    },
+                    {
+                      "fixed": "4.17.23"
+                    }
+                  ]
+                }
+              ],
+              "database_specific": {
+                "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+              }
+            },
+            {
+              "package": {
+                "name": "lodash.omit",
+                "ecosystem": "npm",
+                "purl": "pkg:npm/lodash.omit"
+              },
+              "ranges": [
+                {
+                  "type": "SEMVER",
+                  "events": [
+                    {
+                      "introduced": "4.0.0"
+                    },
+                    {
+                      "fixed": "4.18.0"
+                    }
+                  ]
+                }
+              ],
+              "database_specific": {
+                "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+              }
+            },
+            {
+              "package": {
+                "name": "lodash.unset",
+                "ecosystem": "npm",
+                "purl": "pkg:npm/lodash.unset"
+              },
+              "ranges": [
+                {
+                  "type": "SEMVER",
+                  "events": [
+                    {
+                      "introduced": "4.0.0"
+                    },
+                    {
+                      "fixed": "4.18.0"
+                    }
+                  ]
+                }
+              ],
+              "database_specific": {
+                "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "severity": "HIGH",
+    "unifiedVulnerabilities": [
+      {
+        "id": "GHSA-r5fr-rjxr-66jc",
+        "aliases": [
+          "GHSA-r5fr-rjxr-66jc",
+          "CVE-2026-4800"
+        ],
+        "sources": [
+          "OSV"
+        ],
+        "severity": "HIGH",
+        "description": "lodash vulnerable to Code Injection via `_.template` imports key names",
+        "affected": [
+          {
+            "package": {
+              "name": "lodash",
+              "ecosystem": "npm",
+              "purl": "pkg:npm/lodash"
+            },
+            "ranges": [
+              {
+                "type": "SEMVER",
+                "events": [
+                  {
+                    "introduced": "4.0.0"
+                  },
+                  {
+                    "fixed": "4.18.0"
+                  }
+                ]
+              }
+            ],
+            "database_specific": {
+              "last_known_affected_version_range": "<= 4.17.23",
+              "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-r5fr-rjxr-66jc/GHSA-r5fr-rjxr-66jc.json"
+            }
+          },
+          {
+            "package": {
+              "name": "lodash-es",
+              "ecosystem": "npm",
+              "purl": "pkg:npm/lodash-es"
+            },
+            "ranges": [
+              {
+                "type": "SEMVER",
+                "events": [
+                  {
+                    "introduced": "4.0.0"
+                  },
+                  {
+                    "fixed": "4.18.0"
+                  }
+                ]
+              }
+            ],
+            "database_specific": {
+              "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-r5fr-rjxr-66jc/GHSA-r5fr-rjxr-66jc.json",
+              "last_known_affected_version_range": "<= 4.17.23"
+            }
+          },
+          {
+            "package": {
+              "name": "lodash-amd",
+              "ecosystem": "npm",
+              "purl": "pkg:npm/lodash-amd"
+            },
+            "ranges": [
+              {
+                "type": "SEMVER",
+                "events": [
+                  {
+                    "introduced": "4.0.0"
+                  },
+                  {
+                    "fixed": "4.18.0"
+                  }
+                ]
+              }
+            ],
+            "database_specific": {
+              "last_known_affected_version_range": "<= 4.17.23",
+              "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-r5fr-rjxr-66jc/GHSA-r5fr-rjxr-66jc.json"
+            }
+          },
+          {
+            "package": {
+              "name": "lodash.template",
+              "ecosystem": "npm",
+              "purl": "pkg:npm/lodash.template"
+            },
+            "ranges": [
+              {
+                "type": "SEMVER",
+                "events": [
+                  {
+                    "introduced": "4.0.0"
+                  },
+                  {
+                    "fixed": "4.18.0"
+                  }
+                ]
+              }
+            ],
+            "database_specific": {
+              "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-r5fr-rjxr-66jc/GHSA-r5fr-rjxr-66jc.json"
+            }
+          }
+        ]
+      },
+      {
+        "id": "GHSA-xxjr-mmjv-4gpg",
+        "aliases": [
+          "GHSA-xxjr-mmjv-4gpg",
+          "CVE-2025-13465"
+        ],
+        "sources": [
+          "OSV"
+        ],
+        "severity": "MEDIUM",
+        "description": "Lodash has Prototype Pollution Vulnerability in `_.unset`, `_.omit`, and `_.pullAt` functions",
+        "affected": [
+          {
+            "package": {
+              "name": "lodash",
+              "ecosystem": "npm",
+              "purl": "pkg:npm/lodash"
+            },
+            "ranges": [
+              {
+                "type": "SEMVER",
+                "events": [
+                  {
+                    "introduced": "4.0.0"
+                  },
+                  {
+                    "fixed": "4.17.23"
+                  }
+                ]
+              }
+            ],
+            "database_specific": {
+              "last_known_affected_version_range": "<= 4.17.22",
+              "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+            }
+          },
+          {
+            "package": {
+              "name": "lodash-amd",
+              "ecosystem": "npm",
+              "purl": "pkg:npm/lodash-amd"
+            },
+            "ranges": [
+              {
+                "type": "SEMVER",
+                "events": [
+                  {
+                    "introduced": "4.0.0"
+                  },
+                  {
+                    "fixed": "4.17.23"
+                  }
+                ]
+              }
+            ],
+            "database_specific": {
+              "last_known_affected_version_range": "<= 4.17.22",
+              "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+            }
+          },
+          {
+            "package": {
+              "name": "lodash-es",
+              "ecosystem": "npm",
+              "purl": "pkg:npm/lodash-es"
+            },
+            "ranges": [
+              {
+                "type": "SEMVER",
+                "events": [
+                  {
+                    "introduced": "4.0.0"
+                  },
+                  {
+                    "fixed": "4.17.23"
+                  }
+                ]
+              }
+            ],
+            "database_specific": {
+              "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+            }
+          },
+          {
+            "package": {
+              "name": "lodash.omit",
+              "ecosystem": "npm",
+              "purl": "pkg:npm/lodash.omit"
+            },
+            "ranges": [
+              {
+                "type": "SEMVER",
+                "events": [
+                  {
+                    "introduced": "4.0.0"
+                  },
+                  {
+                    "fixed": "4.18.0"
+                  }
+                ]
+              }
+            ],
+            "database_specific": {
+              "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+            }
+          },
+          {
+            "package": {
+              "name": "lodash.unset",
+              "ecosystem": "npm",
+              "purl": "pkg:npm/lodash.unset"
+            },
+            "ranges": [
+              {
+                "type": "SEMVER",
+                "events": [
+                  {
+                    "introduced": "4.0.0"
+                  },
+                  {
+                    "fixed": "4.18.0"
+                  }
+                ]
+              }
+            ],
+            "database_specific": {
+              "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/01/GHSA-xxjr-mmjv-4gpg/GHSA-xxjr-mmjv-4gpg.json"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "impactAnalysis": {
+    "impactedComponents": [
+      {
+        "id": "npm-fixed-test-application@1.0.0",
+        "name": "npm-fixed-test-application",
+        "version": "1.0.0"
+      }
+    ]
+  },
+  "craValidation": {
+    "compliant": true,
+    "results": [
+      {
+        "ruleId": "CRA-001",
+        "ruleName": "SBOM Available",
+        "passed": true,
+        "message": "SBOM is available.",
+        "expected": "A valid SBOM should be available.",
+        "actual": "A valid SBOM is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-002",
+        "ruleName": "Vulnerability Detection",
+        "passed": true,
+        "message": "Vulnerability analysis completed; 2 findings recorded.",
+        "expected": "Vulnerability analysis should complete successfully and return a valid non-negative finding count.",
+        "actual": "Analysis completed: true. Finding count: 2.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-003",
+        "ruleName": "Dependency Analysis",
+        "passed": true,
+        "message": "Dependency information is available.",
+        "expected": "Dependency relationships should be available for the SBOM components.",
+        "actual": "Dependency information is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-004",
+        "ruleName": "Vulnerability Impact Analysis",
+        "passed": true,
+        "message": "Vulnerability impact analysis is available.",
+        "expected": "Vulnerability impact analysis should complete and return a valid result.",
+        "actual": "Impact analysis is available.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-005",
+        "ruleName": "Component Metadata Validation",
+        "passed": true,
+        "message": "Component metadata is valid.",
+        "expected": "Component name and version should be available and valid.",
+        "actual": "Name: lodash. Version: 4.17.21.",
+        "failureReason": null,
+        "suggestedAction": null
+      },
+      {
+        "ruleId": "CRA-006",
+        "ruleName": "Supplier Metadata Validation",
+        "passed": true,
+        "message": "Warning: Supplier metadata is missing.",
+        "expected": "Supplier information should be provided for component traceability.",
+        "actual": "Supplier information is missing.",
+        "failureReason": "Supplier information is not available.",
+        "suggestedAction": "Add supplier information to the component in the SPDX or CycloneDX SBOM where available."
+      }
+    ]
+  }
+}

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-24T14:06:09.505Z",
-  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:202",
+  "generatedAt": "2026-11-24T14:23:37.696Z",
+  "sbomId": "4:77ebe7e0-220f-4804-aa1c-5ffad78600cb:205",
   "component": {
-    "id": "cra-test-application@1.0.0",
-    "name": "cra-test-application",
+    "id": "npm-fixed-test-application@1.0.0",
+    "name": "npm-fixed-test-application",
     "version": "1.0.0",
-    "supplier": "Apache Software Foundation"
+    "supplier": null
   },
   "vulnerabilityAnalysis": {
-    "componentId": "cra-test-application@1.0.0",
-    "name": "cra-test-application",
+    "componentId": "npm-fixed-test-application@1.0.0",
+    "name": "npm-fixed-test-application",
     "version": "1.0.0",
     "vulnerabilities": {
       "nvd": [],
@@ -70,7 +70,7 @@
         "passed": true,
         "message": "Component metadata is valid.",
         "expected": "Component name and version should be available and valid.",
-        "actual": "Name: cra-test-application. Version: 1.0.0.",
+        "actual": "Name: npm-fixed-test-application. Version: 1.0.0.",
         "failureReason": null,
         "suggestedAction": null
       },
@@ -78,11 +78,11 @@
         "ruleId": "CRA-006",
         "ruleName": "Supplier Metadata Validation",
         "passed": true,
-        "message": "Supplier metadata is available.",
+        "message": "Warning: Supplier metadata is missing.",
         "expected": "Supplier information should be provided for component traceability.",
-        "actual": "Supplier: Apache Software Foundation.",
-        "failureReason": null,
-        "suggestedAction": null
+        "actual": "Supplier information is missing.",
+        "failureReason": "Supplier information is not available.",
+        "suggestedAction": "Add supplier information to the component in the SPDX or CycloneDX SBOM where available."
       }
     ]
   }
